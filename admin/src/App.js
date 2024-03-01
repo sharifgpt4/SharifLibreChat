@@ -7,9 +7,9 @@ import { UserList, UserCreate, UserEdit, UserShow } from './users';
 import MyMenu from './MyMenu';
 
 const App = () => (
-    <Admin authProvider={authProvider} dataProvider={dataProvider} menu={MyMenu}>
-        <Resource name="user" list={UserList} create={UserCreate} edit={UserEdit} show={UserShow} />
-    </Admin>
+  <Admin authProvider={authProvider} dataProvider={dataProvider} menu={MyMenu}>
+    <Resource name="user" list={UserList} create={UserCreate} edit={UserEdit} show={UserShow} />
+  </Admin>
 );
 
 export default App;

@@ -102,7 +102,9 @@ const getAllUsers = async (req, res) => {
 const getUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select('-password');
-    if (!user) {return res.status(404).send({ message: 'User not found' });}
+    if (!user) {
+      return res.status(404).send({ message: 'User not found' });
+    }
     res.json(user);
   } catch (err) {
     res.status(500).send({ message: err.message });
@@ -127,8 +129,14 @@ const createUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { name, username, email, role } = req.body;
-    const user = await User.findByIdAndUpdate(req.params.id, { name, username, email, role }, { new: true });
-    if (!user) {return res.status(404).send({ message: 'User not found' });}
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { name, username, email, role },
+      { new: true },
+    );
+    if (!user) {
+      return res.status(404).send({ message: 'User not found' });
+    }
     res.json({ message: 'User updated successfully', id: user._id });
   } catch (err) {
     res.status(500).send({ message: err.message });
@@ -138,7 +146,9 @@ const updateUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
-    if (!user) {return res.status(404).send({ message: 'User not found' });}
+    if (!user) {
+      return res.status(404).send({ message: 'User not found' });
+    }
     res.json({ message: 'User deleted successfully' });
   } catch (err) {
     res.status(500).send({ message: err.message });
