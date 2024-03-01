@@ -1,6 +1,6 @@
 // dataProvider.js
 
-const apiUrl = 'http://localhost:3080/api';
+const apiUrl = 'http://api:3080/api';
 
 const httpClient = async (url, options = {}) => {
   if (!options.headers) {
