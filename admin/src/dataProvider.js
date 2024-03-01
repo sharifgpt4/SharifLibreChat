@@ -1,6 +1,6 @@
 // dataProvider.js
 
-const apiUrl = 'http://api:3080/api';
+const apiUrl = 'https://qstarmachine.com/api/';
 
 const httpClient = async (url, options = {}) => {
   if (!options.headers) {

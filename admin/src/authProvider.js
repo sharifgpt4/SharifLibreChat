@@ -3,7 +3,7 @@
 
 export default {
   login: async ({ username, password }) => {
-    const request = new Request('http://api:3080/api/auth/login', {
+    const request = new Request('https://qstarmachine.com/api/auth/login', {
       method: 'POST',
       body: JSON.stringify({ password: password, email: username }),
       headers: new Headers({ 'Content-Type': 'application/json' }),
