@@ -81,6 +81,14 @@ const userSchema = mongoose.Schema(
     refreshToken: {
       type: [Session],
     },
+    activeSubscriptions: [{
+      subscription: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Subscription',
+      },
+      activatedAt: { type: Date },
+      expiresAt: { type: Date },
+    }],
   },
   { timestamps: true },
 );

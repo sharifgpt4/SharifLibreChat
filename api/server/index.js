@@ -21,6 +21,13 @@ const { PORT, HOST, ALLOW_SOCIAL_LOGIN } = process.env ?? {};
 const port = Number(PORT) || 3080;
 const host = HOST || 'localhost';
 
+const corsOptions = {
+  origin: ['http://localhost:3000', 'http://localhost:3080'], // Allowed origins
+  optionsSuccessStatus: 200, // For legacy browser support
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Allowed HTTP Methods
+  credentials: true, // Allow cookies and other credentials
+};
+
 const startServer = async () => {
   await connectDb();
   logger.info('Connected to MongoDB');
@@ -41,7 +48,7 @@ const startServer = async () => {
   app.use(express.static(app.locals.paths.dist));
   app.use(express.static(app.locals.paths.publicPath));
   app.set('trust proxy', 1); // trust first proxy
-  app.use(cors());
+  app.use(cors(corsOptions));
 
   if (!ALLOW_SOCIAL_LOGIN) {
     console.warn(

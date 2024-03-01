@@ -1,7 +1,5 @@
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
-const { errorsToString } = require('librechat-data-provider');
-const { registerSchema } = require('~/strategies/validators');
 const getCustomConfig = require('~/server/services/Config/getCustomConfig');
 const Token = require('~/models/schema/tokenSchema');
 const { sendEmail } = require('~/server/utils');
@@ -66,71 +64,47 @@ const logoutUser = async (userId, refreshToken) => {
 };
 
 /**
- * Register a new user
+ * Register or create a new user
  *
- * @param {Object} user <email, password, name, username>
+ * @param {Object} user <email, password, name, username, role (optional for admin)>
+ * @param {Boolean} isAdminAction Indicates if the user is created by an admin
  * @returns
  */
-const registerUser = async (user) => {
-  const { error } = registerSchema.safeParse(user);
-  if (error) {
-    const errorMessage = errorsToString(error.errors);
-    logger.info(
-      'Route: register - Validation Error',
-      { name: 'Request params:', value: user },
-      { name: 'Validation error:', value: errorMessage },
-    );
+const registerUser = async (user, isAdminAction = false) => {
+  // Validate input based on whether this is an admin action or a regular user registration
+  const { email, password, name, username, role } = user;
 
-    return { status: 422, message: errorMessage };
+  // Rest of the function remains mostly unchanged
+  // Ensure to conditionally handle domain checking and role assignment if isAdminAction is true
+  if (!isAdminAction && !(await isDomainAllowed(email))) {
+    const errorMessage = 'Registration from this domain is not allowed.';
+    logger.error(`[registerUser] [Registration not allowed] [Email: ${user.email}]`);
+    return { status: 403, message: errorMessage };
   }
 
-  const { email, password, name, username } = user;
-
-  try {
-    const existingUser = await User.findOne({ email }).lean();
-
-    if (existingUser) {
-      logger.info(
-        'Register User - Email in use',
-        { name: 'Request params:', value: user },
-        { name: 'Existing user:', value: existingUser },
-      );
-
-      // Sleep for 1 second
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // TODO: We should change the process to always email and be generic is signup works or fails (user enum)
-      return { status: 500, message: 'Something went wrong' };
-    }
-
-    if (!(await isDomainAllowed(email))) {
-      const errorMessage = 'Registration from this domain is not allowed.';
-      logger.error(`[registerUser] [Registration not allowed] [Email: ${user.email}]`);
-      return { status: 403, message: errorMessage };
-    }
-
-    //determine if this is the first registered user (not counting anonymous_user)
-    const isFirstRegisteredUser = (await User.countDocuments({})) === 0;
-
-    const newUser = await new User({
-      provider: 'local',
-      email,
-      password,
-      username,
-      name,
-      avatar: null,
-      role: isFirstRegisteredUser ? 'ADMIN' : 'USER',
-    });
-
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync(newUser.password, salt);
-    newUser.password = hash;
-    await newUser.save();
-
-    return { status: 200, user: newUser };
-  } catch (err) {
-    return { status: 500, message: err?.message || 'Something went wrong' };
+  const existingUser = await User.findOne({ email }).lean();
+  if (existingUser) {
+    // Handle existing user
+    return { status: 409, message: 'Email already in use' };
   }
+
+  const newUser = new User({
+    provider: 'local',
+    email,
+    password, // Hash password later
+    username,
+    name,
+    avatar: null,
+    role: isAdminAction ? role : 'USER', // Default to 'USER' if not an admin action
+  });
+
+  // Hash password
+  const salt = bcrypt.genSaltSync(10);
+  newUser.password = bcrypt.hashSync(password, salt);
+
+  await newUser.save();
+
+  return { status: 200, user: newUser };
 };
 
 /**

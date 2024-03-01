@@ -19,7 +19,9 @@ services:
     volumes:
       - ./images:/app/client/public/images
       - ./librechat.yaml:/app/librechat.yaml
-      - ./api:/app/api # Dev Purpose only.
+      - ./api/app:/app/api/app # Dev Purpose only.
+      - ./api/models:/app/api/models # Dev Purpose only.
+      - ./api/server:/app/api/server # Dev Purpose only.
 
   client:
     build:
