@@ -18,6 +18,7 @@ services:
       - .env
     volumes:
       - ./images:/app/client/public/images
+      - ./config:/app/config/
       - ./librechat.yaml:/app/librechat.yaml
 
   client:
