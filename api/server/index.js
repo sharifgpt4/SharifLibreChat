@@ -22,7 +22,7 @@ const port = Number(PORT) || 3080;
 const host = HOST || 'localhost';
 
 const corsOptions = {
-  origin: ['http://localhost:3000', 'http://localhost:3080'], // Allowed origins
+  origin: ['http://localhost:3000', 'http://localhost:3080', 'https://admin.qstarmachine.com', 'https://qstarmachine.com'], // Allowed origins
   optionsSuccessStatus: 200, // For legacy browser support
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Allowed HTTP Methods
   credentials: true, // Allow cookies and other credentials
