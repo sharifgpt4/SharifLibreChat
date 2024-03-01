@@ -41,7 +41,7 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-      target: api-build
+      target: admin-build
     container_name: LibreChat-Admin
     ports:
       - "8002:8000"
