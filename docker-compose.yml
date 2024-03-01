@@ -52,8 +52,7 @@ services:
       - "host.docker.internal:host-gateway"
     env_file:
       - .env
-    command:
-      - npm run start 
+    command: "npm run start"
 
   mongodb:
     container_name: chat-mongodb
