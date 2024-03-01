@@ -16,11 +16,6 @@ services:
     - "host.docker.internal:host-gateway"
     env_file:
       - .env
-    environment:
-      - HOST=0.0.0.0
-      - NODE_ENV=production
-      - MONGO_URI=mongodb://mongodb:27017/LibreChat
-      - MEILI_HOST=http://meilisearch:7700
     volumes:
       - ./images:/app/client/public/images
       - ./librechat.yaml:/app/librechat.yaml
