@@ -54,7 +54,7 @@ services:
       - .env
     command: "npm run start"
     volumes:
-      - ./admin:/app/admin
+      - ./admin/src:/app/admin/src
 
   mongodb:
     container_name: chat-mongodb
