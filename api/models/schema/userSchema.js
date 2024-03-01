@@ -81,8 +81,19 @@ const userSchema = mongoose.Schema(
     refreshToken: {
       type: [Session],
     },
+    // Subscription references
+    activeSubscriptions: [
+      {
+        subscription: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Subscription',
+        },
+        activatedAt: { type: Date },
+        expiresAt: { type: Date },
+      },
+    ],
   },
   { timestamps: true },
 );
 
-module.exports = userSchema;
+module.exports = mongoose.model('User', userSchema);

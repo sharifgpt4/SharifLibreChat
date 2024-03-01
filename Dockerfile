@@ -33,7 +33,20 @@ EXPOSE 3080
 ENV HOST=0.0.0.0
 CMD ["node", "server/index.js"]
 
+# Admin panel build
+FROM data-provider-build AS admin-build
+WORKDIR /app/admin
+COPY ./admin/ ./
+
+RUN mkdir -p /app/admin/node_modules/librechat-data-provider/
+RUN cp -R /app/packages/data-provider/* /app/admin/node_modules/librechat-data-provider/
+RUN npm install
+ENV NODE_OPTIONS="--max-old-space-size=2048"
+RUN npm run build
+
 # Nginx setup
+# In the Nginx setup stage
 FROM nginx:1.21.1-alpine AS prod-stage
+COPY --from=admin-build /app/admin/build /usr/share/nginx/html/admin
 COPY ./client/nginx.conf /etc/nginx/conf.d/default.conf
 CMD ["nginx", "-g", "daemon off;"]
