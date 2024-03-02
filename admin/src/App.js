@@ -1,7 +1,7 @@
 import React from 'react';
 import { Admin, Resource } from 'react-admin';
-import authProvider from './data/authProvider';
-import dataProvider from './data/dataProvider';
+import authProvider from './providers/authProvider';
+import dataProvider from './providers/dataProvider';
 import { UserList, UserCreate, UserEdit, UserShow } from './users';
 import { SubscriptionList, SubscriptionCreate, SubscriptionEdit, SubscriptionShow } from './subscriptions'; // You'll need to create these
 import myTheme from './theme';
