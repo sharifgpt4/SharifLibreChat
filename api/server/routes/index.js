@@ -17,6 +17,7 @@ const user = require('./user');
 const config = require('./config');
 const assistants = require('./assistants');
 const files = require('./files');
+const subscriptions = require('./subscriptions');
 
 module.exports = {
   search,
@@ -38,4 +39,5 @@ module.exports = {
   config,
   assistants,
   files,
+  subscriptions,
 };

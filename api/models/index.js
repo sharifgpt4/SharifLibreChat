@@ -24,6 +24,8 @@ const Session = require('./Session');
 const Balance = require('./Balance');
 const Transaction = require('./Transaction');
 
+const Subscription = require('./Subscription')
+
 module.exports = {
   User,
   Key,
@@ -59,4 +61,6 @@ module.exports = {
   deleteFiles,
   getFiles,
   updateFileUsage,
+
+  Subscription
 };

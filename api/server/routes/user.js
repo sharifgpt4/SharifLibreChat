@@ -15,7 +15,7 @@ const router = express.Router();
 router.get('/', requireJwtAuth, getUserController);
 router.post('/plugins', requireJwtAuth, updateUserPluginsController);
 
-router.get('/get_all_users', requireJwtAuth, getAllUsers);
+router.get('/get_all_user', requireJwtAuth, getAllUsers);
 router.get('/:id', requireJwtAuth, getUser);
 router.post('/', requireJwtAuth, createUser);
 router.put('/:id', requireJwtAuth, updateUser);
