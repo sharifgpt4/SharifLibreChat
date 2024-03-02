@@ -53,9 +53,6 @@ services:
     env_file:
       - .env
     command: "npm run start"
-    volumes:
-      - ./admin/src:/app/admin/src # Dev Purpose only.
-      - ./admin/public:/app/admin/public # Dev Purpose only.
 
   mongodb:
     container_name: chat-mongodb
