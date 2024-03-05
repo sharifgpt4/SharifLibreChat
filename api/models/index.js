@@ -24,7 +24,7 @@ const Session = require('./Session');
 const Balance = require('./Balance');
 const Transaction = require('./Transaction');
 
-const Subscription = require('./Subscription')
+const Subscription = require('./Subscription');
 
 module.exports = {
   User,
@@ -62,5 +62,5 @@ module.exports = {
   getFiles,
   updateFileUsage,
 
-  Subscription
+  Subscription,
 };

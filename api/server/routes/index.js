@@ -18,6 +18,7 @@ const config = require('./config');
 const assistants = require('./assistants');
 const files = require('./files');
 const subscriptions = require('./subscriptions');
+const payment = require('./payment');
 
 module.exports = {
   search,
@@ -40,4 +41,5 @@ module.exports = {
   assistants,
   files,
   subscriptions,
+  payment,
 };
