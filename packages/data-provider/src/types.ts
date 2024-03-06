@@ -226,3 +226,24 @@ export type TRequestPasswordResetResponse = {
   link?: string;
   message?: string;
 };
+
+export type TUserBalance = {
+  balance: number;
+  hasSubscription: boolean;
+  subscriptionDetails?: {
+    activatedAt: Date;
+    expiresAt: Date;
+    subscription: {
+      _id: string;
+      name: string;
+      price: number;
+      duration: number;
+      tokenCreditsCost: number;
+      isActive: boolean;
+      createdAt: Date;
+      updatedAt: Date;
+      __v: number;
+    };
+  };
+};
+

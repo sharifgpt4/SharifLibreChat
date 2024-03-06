@@ -60,14 +60,18 @@ export const useGetMessagesByConvoId = <TData = s.TMessage[]>(
 };
 
 export const useGetUserBalance = (
-  config?: UseQueryOptions<string>,
-): QueryObserverResult<string> => {
-  return useQuery<string>([QueryKeys.balance], () => dataService.getUserBalance(), {
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
-    refetchOnMount: true,
-    ...config,
-  });
+  config?: UseQueryOptions<t.TUserBalance>,
+): QueryObserverResult<t.TUserBalance> => {
+  return useQuery<t.TUserBalance>(
+    [QueryKeys.balance],
+    () => dataService.getUserBalance(), // Make sure dataService.getUserBalance matches the expected return type
+    {
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+      refetchOnMount: true,
+      ...config,
+    },
+  );
 };
 
 export const useGetConversationByIdQuery = (

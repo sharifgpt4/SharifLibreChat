@@ -99,7 +99,7 @@ export function getUser(): Promise<t.TUser> {
   return request.get(endpoints.user());
 }
 
-export function getUserBalance(): Promise<string> {
+export function getUserBalance(): Promise<t.TUserBalance> {
   return request.get(endpoints.balance());
 }
 

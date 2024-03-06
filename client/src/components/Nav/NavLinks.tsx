@@ -16,7 +16,7 @@ import NavLink from './NavLink';
 import Logout from './Logout';
 import { cn } from '~/utils/';
 import store from '~/store';
-import Subscriptions from './Subscriptions'; 
+import Subscriptions from './Subscriptions';
 function NavLinks() {
   const localize = useLocalize();
   const location = useLocation();
@@ -53,6 +53,7 @@ function NavLinks() {
       setShowExports(true);
     }
   };
+  console.log(balanceQuery.data)
 
   return (
     <>
@@ -61,32 +62,31 @@ function NavLinks() {
           <>
             {startupConfig?.checkBalance && balanceQuery.data && (
               <div className="m-1 ml-3 whitespace-nowrap text-left text-sm text-gray-100">
-                {`Balance: ${balanceQuery.data}`}
+                {`Balance: ${balanceQuery.data.balance} Qstar` }
               </div>
             )}
-            
 
-           <Menu as="div" className="relative">
-  {({ open }) => (
-    <>
-      <Menu.Button
-        className={cn(
-          'duration-350 flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors',
-          'hover:bg-[#202123]', // Background color on hover
-          open ? 'bg-[#202123]' : 'bg-transparent', // Conditional background color based on open state
-          'text-sm mb-1' // Text size and bottom margin
-        )}
-        data-testid="nav-user"
-        onClick={() => setShowPricing(true)} 
-      >
-        <span className="flex h-7 w-7 items-center justify-center rounded-full border border-token-border-light">
-        <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
- width="600.000000pt" height="400.000000pt" viewBox="0 0 600.000000 400.000000"
- preserveAspectRatio="xMidYMid meet">
+            <Menu as="div" className="relative">
+              {({ open }) => (
+                <>
+                  <Menu.Button
+                    className={cn(
+                      'duration-350 flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 transition-colors',
+                      'hover:bg-[#202123]', // Background color on hover
+                      open ? 'bg-[#202123]' : 'bg-transparent', // Conditional background color based on open state
+                      'text-sm mb-1', // Text size and bottom margin
+                    )}
+                    data-testid="nav-user"
+                    onClick={() => setShowPricing(true)}
+                  >
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full border border-token-border-light">
+                      <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+                        width="600.000000pt" height="400.000000pt" viewBox="0 0 600.000000 400.000000"
+                        preserveAspectRatio="xMidYMid meet">
 
-<g transform="translate(0.000000,400.000000) scale(0.100000,-0.100000)"
-fill="#fff" stroke="none">
-<path d="M2655 3289 c-152 -20 -345 -95 -480 -184 -78 -52 -193 -162 -258
+                        <g transform="translate(0.000000,400.000000) scale(0.100000,-0.100000)"
+                          fill="#fff" stroke="none">
+                          <path d="M2655 3289 c-152 -20 -345 -95 -480 -184 -78 -52 -193 -162 -258
 -247 -103 -135 -198 -360 -214 -506 -3 -29 -10 -55 -14 -58 -13 -7 -11 -221 1
 -229 6 -3 10 -21 10 -38 0 -48 46 -209 84 -298 113 -261 345 -485 607 -587
 167 -64 238 -77 429 -76 144 1 178 4 268 27 111 29 222 79 222 101 0 14 -103
@@ -109,38 +109,37 @@ l47 50 -30 63 c-38 79 -39 140 -5 223 14 33 25 67 25 76 0 18 -78 99 -96 99
 -68 -65 0 -65 0 -3 54 c-5 79 -2 81 73 81 l66 0 -3 -67z m1180 -1200 c3 -38 0
 -43 -21 -48 -14 -4 -36 -5 -48 -3 -26 3 -35 32 -24 75 5 21 10 24 48 21 42 -3
 42 -3 45 -45z"/>
-</g>
-</svg>
+                        </g>
+                      </svg>
 
-        </span>
-        <div className="flex flex-col">
-        <div
-                className="mt-2 grow overflow-hidden text-ellipsis whitespace-nowrap text-left font-bold text-white"
-                style={{ marginTop: '-4px', marginLeft: '2px' }}
-              >Subscribe To Qstar</div>
-          <span className="text-xs text-token-text-tertiary">Use AI, GPT-4, DALL-E and more</span>
-        </div>
-      </Menu.Button>
-      {showPricing && <Subscriptions open={showPricing} onOpenChange={setShowPricing} />}
+                    </span>
+                    <div className="flex flex-col">
+                      <div
+                        className="mt-2 grow overflow-hidden text-ellipsis whitespace-nowrap text-left font-bold text-white"
+                        style={{ marginTop: '-4px', marginLeft: '2px' }}
+                      >Subscribe To Qstar</div>
+                      <span className="text-xs text-token-text-tertiary">Use AI, GPT-4, DALL-E and more</span>
+                    </div>
+                  </Menu.Button>
+                  {showPricing && <Subscriptions open={showPricing} onOpenChange={setShowPricing} />}
 
-      {/* Menu Items */}
-      <Transition
-        as={Fragment}
-        enter="transition ease-out duration-100"
-        enterFrom="transform opacity-0 scale-95"
-        enterTo="transform opacity-100 scale-100"
-        leave="transition ease-in duration-75"
-        leaveFrom="transform opacity-100 scale-100"
-        leaveTo="transform opacity-0 scale-95"
-      >
-        <Menu.Items className="absolute right-0 w-56 mt-2 origin-top-right bg-white divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-          {/* Menu items here */}
-        </Menu.Items>
-      </Transition>
-    </>
-  )}
-</Menu>
-
+                  {/* Menu Items */}
+                  <Transition
+                    as={Fragment}
+                    enter="transition ease-out duration-100"
+                    enterFrom="transform opacity-0 scale-95"
+                    enterTo="transform opacity-100 scale-100"
+                    leave="transition ease-in duration-75"
+                    leaveFrom="transform opacity-100 scale-100"
+                    leaveTo="transform opacity-0 scale-95"
+                  >
+                    <Menu.Items className="absolute right-0 w-56 mt-2 origin-top-right bg-white divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                      {/* Menu items here */}
+                    </Menu.Items>
+                  </Transition>
+                </>
+              )}
+            </Menu>
 
             <Menu.Button
               className={cn(

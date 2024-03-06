@@ -1,6 +1,8 @@
 export default {
     api: {
-        host: "https://qstarmachine.com"
+        host: "http://localhost:3080"
+
+        //host: "https://qstarmachine.com"
     }    
 
 }
