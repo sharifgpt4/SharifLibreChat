@@ -53,7 +53,7 @@ function NavLinks() {
       setShowExports(true);
     }
   };
-  console.log(balanceQuery.data)
+  console.log(balanceQuery.data);
 
   return (
     <>
@@ -117,7 +117,11 @@ l47 50 -30 63 c-38 79 -39 140 -5 223 14 33 25 67 25 76 0 18 -78 99 -96 99
                       <div
                         className="mt-2 grow overflow-hidden text-ellipsis whitespace-nowrap text-left font-bold text-white"
                         style={{ marginTop: '-4px', marginLeft: '2px' }}
-                      >Subscribe To Qstar</div>
+
+                      >
+                        {balanceQuery.data?.hasSubscription ? `You are a ${balanceQuery.data?.subscriptionDetails.subscription.name} Member` : 'Subscribe to Qstar' }
+
+                      </div>
                       <span className="text-xs text-token-text-tertiary">Use AI, GPT-4, DALL-E and more</span>
                     </div>
                   </Menu.Button>
