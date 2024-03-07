@@ -408,3 +408,31 @@ export const useGetStartupConfig = (): QueryObserverResult<t.TStartupConfig> => 
     },
   );
 };
+
+// Example of fetching a single subscription by ID
+export const useGetSubscriptionByIdQuery = (
+  id: string,
+  config?: UseQueryOptions<t.TSubscription>
+): QueryObserverResult<t.TSubscription> => {
+  return useQuery<t.TSubscription>(
+    ['subscription', id],
+    () => dataService.getSubscriptionById(id),
+    {
+      enabled: !!id, // Only run query if id is truthy
+      ...config,
+    },
+  );
+};
+
+// Example of fetching all subscriptions
+export const useListSubscriptionsQuery = (
+  config?: UseQueryOptions<Array<t.TSubscription>>
+): QueryObserverResult<Array<t.TSubscription>> => {
+  return useQuery<Array<t.TSubscription>>(
+    ['subscriptions'],
+    dataService.listSubscriptions,
+    {
+      ...config,
+    },
+  );
+};

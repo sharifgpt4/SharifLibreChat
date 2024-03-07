@@ -227,6 +227,7 @@ export type TRequestPasswordResetResponse = {
   message?: string;
 };
 
+<<<<<<< Updated upstream
 export type TUserBalance = {
   balance: number;
   hasSubscription: boolean;
@@ -247,3 +248,16 @@ export type TUserBalance = {
   };
 };
 
+=======
+export type TSubscription = {
+  id: string; // Assuming an id field for unique identification
+  name: string;
+  price: number;
+  duration: number;
+  tokenCreditsCost: number;
+  isActive: boolean;
+  description?: string; // Optional based on whether it's required in your schema
+  createdAt?: string; // Included from Mongoose timestamps
+  updatedAt?: string; // Included from Mongoose timestamps
+};
+>>>>>>> Stashed changes

@@ -7,6 +7,7 @@ subscriptionSchema.methods.toJSON = function () {
     name: this.name,
     price: this.price,
     duration: this.duration,
+    description: this.description,
     tokenCreditsCost: this.tokenCreditsCost,
     isActive: this.isActive,
     createdAt: this.createdAt,

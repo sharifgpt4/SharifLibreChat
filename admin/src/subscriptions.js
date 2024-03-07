@@ -28,6 +28,7 @@ export const SubscriptionList = props => (
       <NumberField source="duration" />
       <NumberField source="tokenCreditsCost" />
       <BooleanField source="isActive" />
+      <TextField source="description" />
       <EditButton />
       <ShowButton />
       <DeleteButton />
@@ -42,6 +43,7 @@ export const SubscriptionCreate = props => (
       <NumberInput source="price" />
       <NumberInput source="duration" helpText="Duration in days" />
       <NumberInput source="tokenCreditsCost" />
+      <TextInput source="description" />
       <BooleanInput source="isActive" />
     </SimpleForm>
   </Create>
@@ -56,6 +58,8 @@ export const SubscriptionEdit = props => (
       <NumberInput source="duration" helpText="Duration in days" />
       <NumberInput source="tokenCreditsCost" />
       <BooleanInput source="isActive" />
+      <TextInput source="description" />
+
     </SimpleForm>
   </Edit>
 );
@@ -71,6 +75,8 @@ export const SubscriptionShow = props => (
       <BooleanField source="isActive" />
       <DateField source="createdAt" showTime />
       <DateField source="updatedAt" showTime />
+      <TextField source="description" />
+
     </SimpleShowLayout>
   </Show>
 );

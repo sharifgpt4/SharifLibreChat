@@ -274,3 +274,13 @@ export const listConversationsByQuery = (
 
 export const deleteAction = async (assistant_id: string, action_id: string): Promise<void> =>
   request.delete(endpoints.assistants(`actions/${assistant_id}/${action_id}`));
+
+  // Fetch all subscriptions
+export const listSubscriptions = (): Promise<any> => {
+  return request.get(endpoints.subscriptions());
+};
+
+// Fetch a single subscription by ID
+export const getSubscriptionById = (subscriptionId: string): Promise<any> => {
+  return request.get(endpoints.subscription(subscriptionId));
+};

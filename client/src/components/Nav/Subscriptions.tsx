@@ -1,26 +1,20 @@
 import React from 'react';
+import classnames from 'classnames';
 import { Dialog, DialogContent } from '~/components/ui';
-import { cn } from '~/utils';
+import { useListSubscriptionsQuery } from 'librechat-data-provider/react-query';
 
-// Assuming you have SVG icons for these plans
-
-const SubscriptionOption = ({ title, price, features, note }) => (
-  <div className={cn('flex flex-col justify-between bg-[#202123] text-white rounded-lg p-4 w-full relative text-center')}>
-    {/* Vertical line */}
-    {title !== 'Limited' && <div className={cn('absolute left-0 top-0 bottom-0 w-px bg-gray-700')}></div>}
-    <div>
-      <h3 className={cn('text-xl font-bold flex justify-center items-center gap-2')}>
-        {title} - {price}
-      </h3>
-      <ul className={cn('list-disc pl-5 text-sm mx-auto mt-2 inline-block text-left')}>
-        {features.map((feature, index) => (
-          <li key={index}>{feature}</li>
-        ))}
-      </ul>
-      {note && <p className={cn('text-xs mt-2')}>{note}</p>}
-    </div>
-    <div className={cn('mt-4 flex justify-center')}>
-      <button className={cn('bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded')}>
+const SubscriptionOption = ({ title, price, duration, tokenCreditsCost, isActive, description }) => (
+  <div className={classnames(
+    'flex flex-col justify-between bg-[#202123] text-white rounded-lg p-4',
+    'w-full md:w-1/4 relative text-center m-2'
+  )}>
+    <h3 className="text-xl font-bold">{title}</h3>
+    <p className="text-sm mt-2">{`${price} USD / ${duration} days`}</p>
+    <p className="text-sm mt-2">Tokens: {tokenCreditsCost}</p>
+    {isActive && <span className="text-green-500">Active</span>}
+    <p className="text-sm mt-2">{description || 'No description available.'}</p>
+    <div className="mt-4 flex justify-center">
+      <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
         Choose {title}
       </button>
     </div>
@@ -28,52 +22,40 @@ const SubscriptionOption = ({ title, price, features, note }) => (
 );
 
 export default function Subscriptions({ open, onOpenChange }) {
+  const { data: subscriptions, isLoading, error } = useListSubscriptionsQuery();
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className={cn('shadow-2xl dark:bg-gray-900 dark:text-white flex justify-center items-stretch')}
+        className={classnames(
+          'shadow-2xl dark:bg-gray-900 dark:text-white',
+          'flex justify-center items-start flex-wrap',
+          'p-4', 'rounded-lg', 'overflow-y-auto',
+          'max-h-[120]', 'max-w-6xl'
+        )}
         style={{
-          borderRadius: '12px',
           position: 'fixed',
           margin: 'auto',
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -50%)',
-          width: 'auto', // Adjust based on content
-          padding: '20px',
         }}
       >
-        <div className="flex justify-around space-x-4 mt-4">
-          <SubscriptionOption
-            title="Limited"
-            price="Free"
-            features={[
-              "Access to basic features",
-              "Limited GPT-3 access",
-              "Community support",
-            ]}
-          />
-          <SubscriptionOption
-            title="Plus"
-            price="USD $20/month"
-            features={[
-              "Access to GPT-4, our most capable model",
-              "Browse, create, and use GPTs",
-              "Access to additional tools like DALL·E, Browsing, Advanced Data Analysis and more",
-            ]}
-          />
-          <SubscriptionOption
-            title="Team"
-            price="USD $25 per person/month*"
-            features={[
-              "Everything in Plus, and:",
-              "Higher message caps on GPT-4 and tools like DALL·E, Browsing, Advanced Data Analysis, and more",
-              "Create and share GPTs with your workspace",
-              "Admin console for workspace management",
-              "Team data excluded from training by default. Learn more",
-            ]}
-            note="* Price billed annually, minimum 2 users"
-          />
+        <div className="flex flex-wrap justify-around gap-4 w-full">
+          {subscriptions?.map(subscription => (
+            <SubscriptionOption
+              key={subscription.id}
+              title={subscription.name}
+              price={subscription.price}
+              duration={subscription.duration}
+              tokenCreditsCost={subscription.tokenCreditsCost}
+              isActive={subscription.isActive}
+              description={subscription.description}
+            />
+          ))}
         </div>
       </DialogContent>
     </Dialog>

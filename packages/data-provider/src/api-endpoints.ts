@@ -73,3 +73,9 @@ export const files = () => '/api/files';
 export const images = () => `${files()}/images`;
 
 export const avatar = () => `${images()}/avatar`;
+
+
+export const subscriptions = () => '/api/subscription/get_all_subscription';
+
+// If you have a specific endpoint for a single subscription by ID, define it like this:
+export const subscription = (id: string) => `/api/subscription/${id}`;
