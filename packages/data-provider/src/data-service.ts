@@ -284,3 +284,10 @@ export const listSubscriptions = (): Promise<any> => {
 export const getSubscriptionById = (subscriptionId: string): Promise<any> => {
   return request.get(endpoints.subscription(subscriptionId));
 };
+
+
+export const createPayment = (subscriptionId: string) => {
+  // Make API call to server endpoint to initiate a new payment
+  return request.post(`${endpoints.payment()}/new`, { subscriptionId });
+};
+

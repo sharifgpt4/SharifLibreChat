@@ -23,7 +23,7 @@ exports.createPayment = async (req, res) => {
     const amount = subscription.price.toString(); // Zibal might expect the amount as a string
 
     // Define callback URL dynamically
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3080'; // Adjust according to your environment setup
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3090'; // Adjust according to your environment setup
     const callbackUrl = `${baseUrl}/api/payment/callback`;
 
     let newPayment = new Payment({
@@ -55,28 +55,52 @@ exports.callbackPayment = async (req, res) => {
   const { trackId, success } = req.query;
 
   try {
-    const updatedPayment = await Payment.findOneAndUpdate({ trackId }, { isSuccessFull: success === '1' }, { new: true }).populate('subscription');
+    // Find the payment and update its status based on the callback query parameters
+    const updatedPayment = await Payment.findOneAndUpdate(
+      { trackId },
+      { isSuccessFull: success === '1' },
+      { new: true }
+    ).populate('subscription');
 
+    // Proceed only if the payment was successful
     if (success === '1' && updatedPayment) {
+      // Assuming you've a Transaction model like the one used in add-balance.js
+      const Transaction = require('../../models/Transaction');
       const User = require('../../models/User'); // Adjust the path as necessary
-      const subscriptionDetails = {
-        subscription: updatedPayment.subscription._id,
-        activatedAt: new Date(),
-        expiresAt: new Date(Date.now() + updatedPayment.subscription.duration * 24 * 60 * 60 * 1000), // Assuming duration is in days
-      };
+      
+      // Find the user associated with the payment
+      const user = await User.findById(updatedPayment.user);
+      if (!user) {
+        console.error('User not found');
+        return res.status(404).send({ message: 'User not found' });
+      }
 
-      await User.findByIdAndUpdate(updatedPayment.user, {
-        $push: { activeSubscriptions: subscriptionDetails },
-      }, { new: true });
+      // Create a new transaction to add token credits to the user's balance
+      const transactionResult = await Transaction.create({
+        user: user._id,
+        tokenType: 'credits',
+        context: 'payment',
+        rawAmount: updatedPayment.subscription.tokenCreditsCost,
+      });
+
+      if (!transactionResult) {
+        console.error('Failed to create transaction for updating balance');
+        return res.status(500).send({ message: 'Failed to update user balance' });
+      }
+
+      // Redirect with payment success status
+      res.redirect(`http://localhost:3090?Payment_success=${success}&Payment_trackId=${trackId}`);
+    } else {
+      // Handle cases where payment was not successful or the payment record was not found
+      res.redirect(`http://localhost:3090?Payment_success=${success}&Payment_trackId=${trackId}&error=Payment record not found or was unsuccessful`);
     }
-
-    console.log(updatedPayment);
-    res.redirect(`http://localhost:3080?Payment_success=${success}&Payment_trackId=${trackId}`);
   } catch (err) {
     console.error(err);
     res.status(400).send(err);
   }
 };
+
+
 
 // Assuming the same require statements at the top
 

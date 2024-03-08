@@ -227,7 +227,6 @@ export type TRequestPasswordResetResponse = {
   message?: string;
 };
 
-<<<<<<< Updated upstream
 export type TUserBalance = {
   balance: number;
   hasSubscription: boolean;
@@ -248,7 +247,6 @@ export type TUserBalance = {
   };
 };
 
-=======
 export type TSubscription = {
   id: string; // Assuming an id field for unique identification
   name: string;
@@ -260,4 +258,16 @@ export type TSubscription = {
   createdAt?: string; // Included from Mongoose timestamps
   updatedAt?: string; // Included from Mongoose timestamps
 };
->>>>>>> Stashed changes
+
+export type TPayment = {
+  id: string; // Assuming _id is mapped to id for convenience
+  user: string; // The ID of the User
+  trackId: string;
+  isSuccessFull: boolean;
+  gateway: string;
+  subscription: string; // The ID of the Subscription
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+ 

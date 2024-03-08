@@ -8,6 +8,8 @@ export enum QueryKeys {
   name = 'name', // user key name
   models = 'models',
   balance = 'balance',
+  subscription = 'subscription',
+  payment = 'payment',
   endpoints = 'endpoints',
   presets = 'presets',
   searchResults = 'searchResults',

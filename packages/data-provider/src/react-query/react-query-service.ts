@@ -436,3 +436,30 @@ export const useListSubscriptionsQuery = (
     },
   );
 };
+
+export const useCreatePaymentMutation = (): UseMutationResult<
+  unknown, // You might want to define a more specific type for the mutation result if your API provides a detailed response for the payment creation process.
+  unknown, // Type for any error that might occur during the mutation. This can also be more specific based on your error handling strategy.
+  { subscriptionId: string }, // Mutation variables: in this case, the subscriptionId needed to create a payment.
+  unknown // Context: Optional. You can specify a type here if you're going to use the onMutate method to return a context that's used in onError or onSettled.
+> => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    ({ subscriptionId }: { subscriptionId: string }) =>
+      dataService.createPayment(subscriptionId),
+    {
+      onSuccess: () => {
+        // Invalidate or refetch queries as necessary after a successful payment creation.
+        // For example, if you need to update the user's subscription status or balance:
+        queryClient.invalidateQueries([QueryKeys.balance]);
+        // Add any other queries that need to be updated due to the payment creation.
+      },
+      onError: (error) => {
+        // Handle error. For example, you could log the error or display a notification to the user.
+        console.error('Error creating payment:', error);
+      },
+      // Optionally, you can use onMutate, onSettled, etc., to further manage the mutation's lifecycle.
+    },
+  );
+};
+
