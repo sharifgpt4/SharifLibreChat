@@ -17,15 +17,15 @@ balanceSchema.statics.check = async function ({
   const tokenCost = amount * multiplier;
   const { tokenCredits: balance } = (await this.findOne({ user }, 'tokenCredits').lean()) ?? {};
 
-  // Fetch the user's active subscriptions
+  // Fetch the user's active subscriptions that have not expired
   const now = new Date();
-  const activeSubscriptions = await User.findOne({
+  const userWithActiveSubscriptions = await User.findOne({
     _id: user,
     'activeSubscriptions.expiresAt': { $gt: now },
   }, 'activeSubscriptions').lean();
 
-  // Check if there is any active subscription
-  const hasActivePackage = activeSubscriptions && activeSubscriptions.activeSubscriptions.length > 0;
+  // Check if the user has any active (not expired) subscriptions
+  const hasActiveSubscription = userWithActiveSubscriptions && userWithActiveSubscriptions.activeSubscriptions.some(subscription => subscription.expiresAt > now);
 
   logger.debug('[Balance.check]', {
     user,
@@ -37,21 +37,26 @@ balanceSchema.statics.check = async function ({
     balance,
     multiplier,
     endpointTokenConfig: !!endpointTokenConfig,
-    hasActivePackage,
+    hasActiveSubscription,
   });
 
-  if (!balance || !hasActivePackage) {
+  if (!balance || balance < tokenCost || !hasActiveSubscription) {
     return {
       canSpend: false,
       balance: balance || 0,
       tokenCost,
-      hasActivePackage,
+      hasActiveSubscription,
     };
   }
 
-  logger.debug('[Balance.check]', { tokenCost, hasActivePackage });
+  logger.debug('[Balance.check]', { tokenCost, hasActiveSubscription });
 
-  return { canSpend: balance >= tokenCost, balance, tokenCost, 'hasActivePackage': hasActivePackage };
+  return {
+    canSpend: true,
+    balance,
+    tokenCost,
+    hasActiveSubscription,
+  };
 };
 
 module.exports = mongoose.model('Balance', balanceSchema);

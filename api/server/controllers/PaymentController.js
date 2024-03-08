@@ -6,7 +6,7 @@ const Subscription = require('../../models/Subscription'); // Adjust the path as
 // Create a new payment and initiate a payment request
 exports.createPayment = async (req, res) => {
   let zibal = new Zibal({
-    merchant: 'zibal',
+    merchant: '65a14466c5d2cb001d8d45ce',
     logLevel: 2,
   });
 
