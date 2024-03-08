@@ -64,10 +64,9 @@ exports.callbackPayment = async (req, res) => {
 
     // Proceed only if the payment was successful
     if (success === '1' && updatedPayment) {
-      // Assuming you've a Transaction model like the one used in add-balance.js
-      const Transaction = require('../../models/Transaction');
       const User = require('../../models/User'); // Adjust the path as necessary
-      
+      const Transaction = require('../../models/Transaction'); // Ensure you have a Transaction model to create transactions
+
       // Find the user associated with the payment
       const user = await User.findById(updatedPayment.user);
       if (!user) {
@@ -75,30 +74,38 @@ exports.callbackPayment = async (req, res) => {
         return res.status(404).send({ message: 'User not found' });
       }
 
-      // Create a new transaction to add token credits to the user's balance
-      const transactionResult = await Transaction.create({
+      // Add subscription details to the user's active subscriptions
+      const subscriptionDetails = {
+        subscription: updatedPayment.subscription._id,
+        activatedAt: new Date(),
+        expiresAt: new Date(Date.now() + updatedPayment.subscription.duration * 24 * 60 * 60 * 1000), // Assuming duration is in days
+      };
+
+      // Update user with new subscription details
+      await User.findByIdAndUpdate(user._id, {
+        $push: { activeSubscriptions: subscriptionDetails }
+      }, { new: true });
+
+      // Create a transaction to add token credits to the user's balance
+      await Transaction.create({
         user: user._id,
         tokenType: 'credits',
         context: 'payment',
         rawAmount: updatedPayment.subscription.tokenCreditsCost,
       });
 
-      if (!transactionResult) {
-        console.error('Failed to create transaction for updating balance');
-        return res.status(500).send({ message: 'Failed to update user balance' });
-      }
-
       // Redirect with payment success status
       res.redirect(`https://qstarmachine.com?Payment_success=${success}&Payment_trackId=${trackId}`);
     } else {
       // Handle cases where payment was not successful or the payment record was not found
-      res.redirect(`https://qstarmachine.com?Payment_success=${success}&Payment_trackId=${trackId}`);
+      res.redirect(`https://qstarmachine.com?Payment_success=${success}&Payment_trackId=${trackId}&error=Payment record not found or was unsuccessful`);
     }
   } catch (err) {
     console.error(err);
     res.status(400).send(err);
   }
 };
+
 
 
 
