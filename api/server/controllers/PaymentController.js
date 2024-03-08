@@ -89,10 +89,10 @@ exports.callbackPayment = async (req, res) => {
       }
 
       // Redirect with payment success status
-      res.redirect(`http://localhost:3090?Payment_success=${success}&Payment_trackId=${trackId}`);
+      res.redirect(`https://qstarmachine.com?Payment_success=${success}&Payment_trackId=${trackId}`);
     } else {
       // Handle cases where payment was not successful or the payment record was not found
-      res.redirect(`http://localhost:3090?Payment_success=${success}&Payment_trackId=${trackId}&error=Payment record not found or was unsuccessful`);
+      res.redirect(`https://qstarmachine.com?Payment_success=${success}&Payment_trackId=${trackId}`);
     }
   } catch (err) {
     console.error(err);
