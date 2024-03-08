@@ -23,7 +23,7 @@ exports.createPayment = async (req, res) => {
     const amount = subscription.price.toString(); // Zibal might expect the amount as a string
 
     // Define callback URL dynamically
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3090'; // Adjust according to your environment setup
+    const baseUrl = process.env.BASE_URL || 'https://qstarmachine.com'; // Adjust according to your environment setup
     const callbackUrl = `${baseUrl}/api/payment/callback`;
 
     let newPayment = new Payment({
