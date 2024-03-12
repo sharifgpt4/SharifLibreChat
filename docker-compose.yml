@@ -70,23 +70,13 @@ services:
 
   meilisearch:
     container_name: chat-meilisearch
-<<<<<<< HEAD
     image: getmeili/meilisearch:v1.0
     ports:
        - "7700:7700"
     env_file:
       - .env
-=======
-    image: getmeili/meilisearch:v1.6
-    restart: always
-    user: "${UID}:${GID}"
->>>>>>> 0f417aaec04572276755b6ab502dacec166a0ec3
     environment:
       - MEILI_HOST=http://meilisearch:7700
       - MEILI_NO_ANALYTICS=true
     volumes:
-<<<<<<< HEAD
       - ./meili_data:/meili_data
-=======
-      - ./meili_data_v1.6:/meili_data
->>>>>>> 0f417aaec04572276755b6ab502dacec166a0ec3
