@@ -1,10 +1,12 @@
 ---
-title: 🖥️ Custom Endpoints & Config
+title: 🖥️ Custom Config
 description: Comprehensive guide for configuring the `librechat.yaml` file AKA the LibreChat Config file. This document is your one-stop resource for understanding and customizing endpoints & other integrations.
-weight: -10
+weight: -11
 ---
 
 # LibreChat Configuration Guide
+
+## Intro
 
 Welcome to the guide for configuring the **librechat.yaml** file in LibreChat.
 
@@ -21,6 +23,10 @@ Stay tuned for ongoing enhancements to customize your LibreChat instance!
 > Note: To verify your YAML config, you can use online tools like [yamlchecker.com](https://yamlchecker.com/)
 
 **Note:** To verify your YAML config, you can use online tools like [yamlchecker.com](https://yamlchecker.com/)
+
+## Compatible Endpoints
+
+Any API designed to be compatible with OpenAI's should be supported, but here is a list of **[known compatible endpoints](./ai_endpoints.md) including example setups.**
 
 ## Setup
 
@@ -74,18 +80,18 @@ fileConfig:
       fileLimit: 5
       fileSizeLimit: 10  # Maximum size for an individual file in MB
       totalSizeLimit: 50  # Maximum total size for all files in a single request in MB
-      supportedMimeTypes:
-        - "image/.*"
-        - "application/pdf"
+      # supportedMimeTypes: # In case you wish to limit certain filetypes
+      #   - "image/.*"
+      #   - "application/pdf"
     openAI:
       disabled: true  # Disables file uploading to the OpenAI endpoint
     default:
       totalSizeLimit: 20
-    YourCustomEndpointName:
-      fileLimit: 2
-      fileSizeLimit: 5
+    # YourCustomEndpointName: # Example for custom endpoints
+    #   fileLimit: 2
+    #   fileSizeLimit: 5
   serverFileSizeLimit: 100  # Global server file size limit in MB
-  avatarSizeLimit: 2  # Limit for user avatar image size in MB
+  avatarSizeLimit: 4  # Limit for user avatar image size in MB, default: 2 MB
 rateLimits:
   fileUploads:
     ipMax: 100
@@ -110,19 +116,15 @@ endpoints:
       apiKey: "${MISTRAL_API_KEY}"
       baseURL: "https://api.mistral.ai/v1"
       models:
-        default: ["mistral-tiny", "mistral-small", "mistral-medium"]
+        default: ["mistral-tiny", "mistral-small", "mistral-medium", "mistral-large-latest"]
         fetch: true  # Attempt to dynamically fetch available models
         userIdQuery: false
       iconURL: "https://example.com/mistral-icon.png"
       titleConvo: true
-      titleMethod: "completion"
       titleModel: "mistral-tiny"
-      summarize: true
-      summaryModel: "mistral-summary"
-      forcePrompt: false
       modelDisplayLabel: "Mistral AI"
-      addParams:
-        safe_prompt: true
+      # addParams:
+      #   safe_prompt: true # Mistral specific value for moderating messages
       dropParams:
         - "stop"
         - "user"
@@ -138,10 +140,9 @@ endpoints:
         fetch: false
       titleConvo: true
       titleModel: "gpt-3.5-turbo"
-      summarize: false
-      forcePrompt: false
       modelDisplayLabel: "OpenRouter"
       dropParams:
+        - "stop"
         - "frequency_penalty"
 ```
 
@@ -515,15 +516,12 @@ endpoints:
       apiKey: "${YOUR_ENV_VAR_KEY}"
       baseURL: "https://api.mistral.ai/v1"
       models: 
-        default: ["mistral-tiny", "mistral-small", "mistral-medium"]
+        default: ["mistral-tiny", "mistral-small", "mistral-medium", "mistral-large-latest"]
       titleConvo: true
       titleModel: "mistral-tiny" 
-      summarize: false
-      summaryModel: "mistral-tiny" 
-      forcePrompt: false 
       modelDisplayLabel: "Mistral"
-      addParams:
-        safe_prompt: true
+      # addParams:
+      #   safe_prompt: true # Mistral specific value for moderating messages
       # NOTE: For Mistral, it is necessary to drop the following parameters or you will encounter a 422 Error:
       dropParams: ["stop", "user", "frequency_penalty", "presence_penalty"]
 ```
@@ -564,6 +562,12 @@ endpoints:
   - **Note**: The following are "known endpoints" (case-insensitive), which have icons provided for them. If your endpoint `name` matches the following names, you should omit this field:
     - "Mistral"
     - "OpenRouter"
+    - "Groq"
+    - "Anyscale"
+    - "Fireworks"
+    - "Perplexity"
+    - "together.ai"
+    - "Ollama"
 
 ### **models**:
 

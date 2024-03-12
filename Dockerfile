@@ -6,6 +6,12 @@ FROM base AS data-provider-build
 WORKDIR /app/packages/data-provider
 COPY ./packages/data-provider ./
 RUN npm install
+RUN touch .env
+RUN npm config set fetch-retry-maxtimeout 300000
+RUN apk add --no-cache g++ make python3 py3-pip
+RUN npm install -g node-gyp
+RUN apk --no-cache add curl && \
+    npm install
 RUN npm run build
 
 # React client build
