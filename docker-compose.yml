@@ -64,7 +64,7 @@ services:
     image: mongo
     restart: always
     volumes:
-      - ./data-node:/data/db
+      - /srv/data.vol/data-node:/data/db
     command: mongod --noauth
 
 

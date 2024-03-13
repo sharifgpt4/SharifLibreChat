@@ -7,7 +7,7 @@ const Subscription = require('../../models/Subscription'); // Adjust the path as
 exports.createPayment = async (req, res) => {
   let zibal = new Zibal({
     //merchant: '65a14466c5d2cb001d8d45ce',
-    merchant: 'zibal', // TEST 
+    merchant: 'zibal', // TEST
     logLevel: 2,
   });
 
@@ -51,64 +51,62 @@ exports.createPayment = async (req, res) => {
   }
 };
 
-
 exports.callbackPayment = async (req, res) => {
   const { trackId, success } = req.query;
 
   try {
-    // Find the payment and update its status based on the callback query parameters
+    // First, find the payment and update its status based on the callback query parameters
     const updatedPayment = await Payment.findOneAndUpdate(
       { trackId },
       { isSuccessFull: success === '1' },
-      { new: true }
+      { new: true },
     ).populate('subscription');
 
-    // Proceed only if the payment was successful
-    if (success === '1' && updatedPayment) {
-      const User = require('../../models/User'); // Adjust the path as necessary
-      const Transaction = require('../../models/Transaction'); // Ensure you have a Transaction model to create transactions
-
-      // Find the user associated with the payment
-      const user = await User.findById(updatedPayment.user);
-      if (!user) {
-        console.error('User not found');
-        return res.status(404).send({ message: 'User not found' });
-      }
-
-      // Add subscription details to the user's active subscriptions
-      const subscriptionDetails = {
-        subscription: updatedPayment.subscription._id,
-        activatedAt: new Date(),
-        expiresAt: new Date(Date.now() + updatedPayment.subscription.duration * 24 * 60 * 60 * 1000), // Assuming duration is in days
-      };
-
-      // Update user with new subscription details
-      await User.findByIdAndUpdate(user._id, {
-        $push: { activeSubscriptions: subscriptionDetails }
-      }, { new: true });
-
-      // Create a transaction to add token credits to the user's balance
-      await Transaction.create({
-        user: user._id,
-        tokenType: 'credits',
-        context: 'payment',
-        rawAmount: updatedPayment.subscription.tokenCreditsCost,
-      });
-
-      // Redirect with payment success status
-      res.redirect(`https://qstarmachine.com?Payment_success=${success}&Payment_trackId=${trackId}`);
-    } else {
-      // Handle cases where payment was not successful or the payment record was not found
-      res.redirect(`https://qstarmachine.com?Payment_success=${success}&Payment_trackId=${trackId}&error=Payment record not found or was unsuccessful`);
+    // Proceed only if the payment was successful and the payment record was found
+    if (success !== '1' || !updatedPayment) {
+      // Redirect indicating the payment was not successful or not found
+      return res.redirect(`https://qstarmachine.com?Payment_success=${success}&Payment_trackId=${trackId}&error=Payment record not found or was unsuccessful`);
     }
+
+    // At this point, the payment is confirmed successful; proceed with related logics
+
+    const User = require('../../models/User'); // Adjust the path as necessary
+    const Transaction = require('../../models/Transaction'); // Ensure you have a Transaction model to create transactions
+
+    // Find the user associated with the payment
+    const user = await User.findById(updatedPayment.user);
+    if (!user) {
+      console.error('User not found');
+      return res.status(404).send({ message: 'User not found' });
+    }
+
+    // Add subscription details to the user's active subscriptions
+    const subscriptionDetails = {
+      subscription: updatedPayment.subscription._id,
+      activatedAt: new Date(),
+      expiresAt: new Date(Date.now() + updatedPayment.subscription.duration * 24 * 60 * 60 * 1000), // Assuming duration is in days
+    };
+
+    // Update user with new subscription details
+    await User.findByIdAndUpdate(user._id, {
+      $push: { activeSubscriptions: subscriptionDetails },
+    }, { new: true });
+
+    // Create a transaction to add token credits to the user's balance
+    await Transaction.create({
+      user: user._id,
+      tokenType: 'credits',
+      context: 'payment',
+      rawAmount: updatedPayment.subscription.tokenCreditsCost,
+    });
+
+    // Redirect with payment success status
+    res.redirect(`https://qstarmachine.com?Payment_success=${success}&Payment_trackId=${trackId}`);
   } catch (err) {
     console.error(err);
     res.status(400).send(err);
   }
 };
-
-
-
 
 // Assuming the same require statements at the top
 
