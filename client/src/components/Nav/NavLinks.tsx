@@ -63,7 +63,6 @@ function NavLinks() {
           <>
             {startupConfig?.checkBalance && balanceQuery.data && (
               <div className="m-1 ml-3 whitespace-nowrap text-left text-sm text-gray-100">
-                {`Balance: ${balanceQuery.data.balance} Qstar` }
               </div>
             )}
 
@@ -120,10 +119,12 @@ l47 50 -30 63 c-38 79 -39 140 -5 223 14 33 25 67 25 76 0 18 -78 99 -96 99
                         style={{ marginTop: '-4px', marginLeft: '2px' }}
 
                       >
-                        {balanceQuery.data?.hasSubscription ? `You are a ${balanceQuery.data?.subscriptionDetails.subscription.name} Member` : 'Subscribe to Qstar' }
+                        {balanceQuery.data?.hasSubscription ? `${balanceQuery.data?.subscriptionDetails.subscription.name} ` : 'Subscribe to Qstar' }
 
                       </div>
-                      <span className="text-xs text-token-text-tertiary">Use AI, GPT-4, DALL-E and more</span>
+                      
+
+                      <span className="text-xs text-token-text-tertiary">{balanceQuery.data?.hasSubscription ? `` : 'Use AI, GPT-4, DALL-E and more' }</span>
                     </div>
                   </Menu.Button>
                   {showPricing && <Subscriptions open={showPricing} onOpenChange={setShowPricing} />}

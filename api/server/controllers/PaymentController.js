@@ -25,6 +25,7 @@ exports.createPayment = async (req, res) => {
 
     // Define callback URL dynamically
     const baseUrl = process.env.BASE_URL || 'https://qstarmachine.com'; // Adjust according to your environment setup
+    
     const callbackUrl = `${baseUrl}/api/payment/callback`;
 
     let newPayment = new Payment({
