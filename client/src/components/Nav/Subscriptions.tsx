@@ -100,10 +100,10 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ open, onOpenChange }) => 
   const { data: subscriptions, isLoading, error } = useListSubscriptionsQuery<Subscription[]>();
   const createPaymentMutation = useCreatePaymentMutation<TPayment>();
   const navigate = useNavigate(); // Use this if you need to navigate the user after an action
-  console.log()
+
 
   const handleSubscribe = (subscriptionId: string) => {
-
+    console.log(balanceQuery.data?.hasSubscription)
     if (balanceQuery.data?.hasSubscription){
       return true
       
@@ -116,7 +116,7 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ open, onOpenChange }) => 
 
           // Adjust the `any` type based on your actual API response structure
           // Assuming `newPayment` contains a property `url` for redirection
-          if (!newPayment.paymentUrl) {
+          if (newPayment.paymentUrl) {
             window.location.href = newPayment.paymentUrl; // Redirects the user to the payment URL
             // For internal routing, use navigate('/path');
           }
@@ -185,6 +185,7 @@ const Subscriptions: React.FC<SubscriptionsProps> = ({ open, onOpenChange }) => 
         <div className="flex flex-wrap justify-around gap-4 w-full">
           {subscriptions?.map((subscription: Subscription) => (
             <SubscriptionOption
+              id={subscription.id}
               key={subscription.id}
               title={subscription.name}
               price={subscription.price}
