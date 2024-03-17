@@ -50,8 +50,6 @@ services:
     restart: always
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    env_file:
-      - .env
     command: "npm run start"
     volumes:
       - ./admin/src:/app/admin/src # Dev Purpose only.
