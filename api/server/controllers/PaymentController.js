@@ -6,8 +6,8 @@ const Subscription = require('../../models/Subscription'); // Adjust the path as
 // Create a new payment and initiate a payment request
 exports.createPayment = async (req, res) => {
   let zibal = new Zibal({
-    //merchant: '65a14466c5d2cb001d8d45ce',
-    merchant: 'zibal', // TEST
+    merchant: '65a14466c5d2cb001d8d45ce',
+    //merchant: 'zibal', // TEST
     logLevel: 2,
   });
 
@@ -25,6 +25,7 @@ exports.createPayment = async (req, res) => {
 
     // Define callback URL dynamically
     const baseUrl = process.env.BASE_URL || 'https://qstarmachine.com'; // Adjust according to your environment setup
+    
     const callbackUrl = `${baseUrl}/api/payment/callback`;
 
     let newPayment = new Payment({

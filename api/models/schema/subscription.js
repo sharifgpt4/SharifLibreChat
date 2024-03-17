@@ -24,9 +24,9 @@ const subscriptionSchema = new mongoose.Schema({
     default: true,
     comment: 'Indicates if the subscription is available for purchase',
   },
-  description: { // Adding the description field
-    type: String,
-    required: false, // Adjust according to whether this field is mandatory
+  description: {
+    type: String, // This indicates the field is an array of strings
+    required: false,
     comment: 'Description of the subscription',
   },
 }, { timestamps: true });
