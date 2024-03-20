@@ -24,8 +24,8 @@ exports.createPayment = async (req, res) => {
     const amount = subscription.price.toString(); // Zibal might expect the amount as a string
 
     // Define callback URL dynamically
-    const baseUrl = process.env.BASE_URL || 'https://qstarmachine.com'; // Adjust according to your environment setup
-    
+    const baseUrl = process.env.BASE_URL || 'https://chat.qstarmachine.com'; // Adjust according to your environment setup
+
     const callbackUrl = `${baseUrl}/api/payment/callback`;
 
     let newPayment = new Payment({
@@ -66,7 +66,7 @@ exports.callbackPayment = async (req, res) => {
     // Proceed only if the payment was successful and the payment record was found
     if (success !== '1' || !updatedPayment) {
       // Redirect indicating the payment was not successful or not found
-      return res.redirect(`https://qstarmachine.com?Payment_success=${success}&Payment_trackId=${trackId}&error=Payment record not found or was unsuccessful`);
+      return res.redirect(`https://chat.qstarmachine.com?Payment_success=${success}&Payment_trackId=${trackId}&error=Payment record not found or was unsuccessful`);
     }
 
     // At this point, the payment is confirmed successful; proceed with related logics

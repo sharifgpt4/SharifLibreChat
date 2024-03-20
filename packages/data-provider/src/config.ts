@@ -205,7 +205,7 @@ export const alternateName = {
   [EModelEndpoint.bingAI]: 'Bing',
   [EModelEndpoint.chatGPTBrowser]: 'ChatGPT',
   [EModelEndpoint.gptPlugins]: 'Plugins',
-  [EModelEndpoint.google]: 'Google',
+  [EModelEndpoint.google]: 'Gemini',
   [EModelEndpoint.anthropic]: 'Anthropic',
   [EModelEndpoint.custom]: 'Custom',
 };

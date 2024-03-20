@@ -219,7 +219,7 @@ l47 50 -30 63 c-38 79 -39 140 -5 223 14 33 25 67 25 76 0 18 -78 99 -96 99
                       className="flex w-full cursor-pointer items-center gap-3 rounded-none px-3 py-3 text-sm text-black transition-colors duration-200 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                       svg={() => <LinkIcon />}
                       text={localize('com_nav_help_faq')}
-                      clickHandler={() => window.open(startupConfig?.helpAndFaqURL, '_blank')}
+                      clickHandler={() => window.open('https://qstarmachine.com', '_blank')}
                     />
                   </Menu.Item>
                 )}

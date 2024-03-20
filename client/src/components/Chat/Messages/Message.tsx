@@ -44,7 +44,12 @@ export default function Message(props: TMessageProps) {
   if (isCreatedByUser) {
     messageLabel = UsernameDisplay ? user?.name : localize('com_user_message');
   } else {
-    messageLabel = message.sender;
+    if (message.sender === 'GPT-4'){
+      messageLabel = 'GPT-4.5';
+    }else {
+      messageLabel = message.sender;
+    }
+
   }
 
   return (

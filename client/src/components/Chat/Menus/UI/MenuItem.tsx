@@ -46,7 +46,10 @@ const MenuItem: FC<MenuItemProps> = ({
           <div className={cn('flex items-center gap-1 ')}>
             {icon && icon}
             <div className={cn('truncate', textClassName)}>
-              {title}
+              {title === 'gpt-4-turbo-preview'? (
+                'gpt-4.5-turbo'
+              ):  title  }
+
               <div className="text-token-text-tertiary">{description}</div>
             </div>
           </div>

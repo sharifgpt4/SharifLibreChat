@@ -69,7 +69,8 @@ function SelectDropDownPop({
                   {/* {!showLabel && !emptyTitle && (
                     <span className="text-xs text-gray-700 dark:text-gray-500">{title}:</span>
                   )} */}
-                  {typeof value !== 'string' && value ? value?.label ?? '' : value ?? ''}
+
+                  {typeof value !== 'string' && value ? value?.label ?? '' : value === 'gpt-4-turbo-preview' ? 'gpt-4.5-turbo': value}
                 </span>
               </span>
               <span className="absolute inset-y-0 right-0 flex items-center pr-2">

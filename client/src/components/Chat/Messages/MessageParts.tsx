@@ -26,6 +26,7 @@ export default function Message(props: TMessageProps) {
     handleContinue,
     copyToClipboard,
     regenerateMessage,
+    chatterText,
   } = useMessageHelpers(props);
 
   const { content, children, messageId = null, isCreatedByUser, error, unfinished } = message ?? {};
