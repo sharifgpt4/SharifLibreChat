@@ -44,7 +44,7 @@ services:
       target: admin-build
     container_name: LibreChat-Admin
     ports:
-      - "8002:3080"
+      - "8002:3000"
     depends_on:
       - api
     restart: always
