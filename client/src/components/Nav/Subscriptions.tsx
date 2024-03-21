@@ -41,25 +41,25 @@ const SubscriptionOption: React.FC<SubscriptionOptionProps> = ({
     <div style={{ direction: 'rtl' }} className={cn(
       'flex flex-col justify-between -lg p-4 ',
       'text-black dark:text-white',
-      'transition-shadow duration-300 hover:shadow-xl border-r border-l border-primary  px-10 py-10',
+      'transition-shadow duration-300 hover:shadow-xl border-r border-l border-primary  px-10 py-10', 'farsi'
       isSmallScreen ? 'w-full' : 'w-1/4',
     )}>
-      <h3 className="text-xl font-bold">{title}</h3>
-      <p className="text-sm mt-2">{`${formattedPrice} تومان / ${duration} روز`}</p>
-      <p className="text-sm mt-2">تعداد رکوست: {tokenCreditsCost <= 1000 ? `${tokenCreditsCost / 25}` : 'نامحدود'}</p>
-      <div className="mt-4 flex justify-center">
+      <h3 className="text-xl font-bold farsi">{title}</h3>
+      <p className="text-sm mt-2 farsi">{`${formattedPrice} تومان / ${duration} روز`}</p>
+      <p className="text-sm mt-2 farsi">تعداد رکوست: {tokenCreditsCost <= 1000 ? `${tokenCreditsCost / 25}` : 'نامحدود'}</p>
+      <div className="mt-4 flex justify-center farsi">
         <button
           onClick={() => onSubscribe(id)}
-          className={`text-white w-full font-bold py-4 px-3 rounded ${buttonClass}`}
+          className={`text-white w-full font-bold py-4 px-3 rounded farsi ${buttonClass}`}
           disabled={isUserCurrentPlan}
         >
           {buyButtonValue}
         </button>
       </div>
 
-      <ul className="text-sm mt-8 text-center list-disc list-inside">
+      <ul className="text-sm mt-8 text-center list-disc list-inside farsi">
         {description?.split('\n\n').map((item, index) => (
-          <li key={index} style={{ direction: 'rtl' }} className="mb-2">{item}</li>
+          <li key={index} style={{ direction: 'rtl' }} className="mb-2 farsi">{item}</li>
         ))}
       </ul>
     </div>
@@ -108,7 +108,7 @@ const Subscriptions = ({ open, onOpenChange }) => {
           'shadow-2xl dark:bg-gray-900 dark:text-white',
           'flex justify-center items-start flex-wrap',
           'p-8', 'rounded-lg', 'overflow-y-auto',
-          'max-h-[100vh]', 'max-w-7xl',
+          'max-h-[100vh]', 'max-w-7xl', 'farsi'
         )}
         style={{
           position: 'fixed',
@@ -117,7 +117,7 @@ const Subscriptions = ({ open, onOpenChange }) => {
           transform: 'translate(-50%, -50%)',
         }}
       >
-        <div className="flex flex-wrap justify-around gap-2 w-full">
+        <div className="flex flex-wrap justify-around gap-2 w-full 'farsi">
           {subscriptions?.map((subscription) => {
             const isUserCurrentPlan = subscription.id === userSubscriptionId;
             // Adjusted buyButtonValue to handle user's current plan more explicitly

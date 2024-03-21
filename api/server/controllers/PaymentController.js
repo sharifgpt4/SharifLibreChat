@@ -102,7 +102,7 @@ exports.callbackPayment = async (req, res) => {
     });
 
     // Redirect with payment success status
-    res.redirect(`https://qstarmachine.com?Payment_success=${success}&Payment_trackId=${trackId}`);
+    res.redirect(`https://chat.qstarmachine.com?Payment_success=${success}&Payment_trackId=${trackId}`);
   } catch (err) {
     console.error(err);
     res.status(400).send(err);
