@@ -41,7 +41,7 @@ const SubscriptionOption: React.FC<SubscriptionOptionProps> = ({
     <div style={{ direction: 'rtl' }} className={cn(
       'flex flex-col justify-between -lg p-4 ',
       'text-black dark:text-white',
-      'transition-shadow duration-300 hover:shadow-xl border-r border-l border-primary  px-10 py-10', 'farsi'
+      'transition-shadow duration-300 hover:shadow-xl border-r border-l border-primary  px-10 py-10', 'farsi',
       isSmallScreen ? 'w-full' : 'w-1/4',
     )}>
       <h3 className="text-xl font-bold farsi">{title}</h3>
