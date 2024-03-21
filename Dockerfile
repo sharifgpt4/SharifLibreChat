@@ -46,8 +46,8 @@ COPY ./admin/ ./
 
 RUN npm install
 ENV NODE_OPTIONS="--max-old-space-size=2048"
-EXPOSE 3000
-CMD ["npm", "run", "build"]
+RUN npm run build
+CMD ["npm", "run", "start"]
 
 
 # Nginx setup
