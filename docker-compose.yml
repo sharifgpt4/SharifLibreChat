@@ -57,14 +57,14 @@ services:
 
   mongodb:
     container_name: chat-mongodb
-    ports:
-      - "27018:27017"
     image: mongo
     restart: always
     volumes:
       - /srv/data.vol/data-node:/data/db
-    command: mongod --noauth
-
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=Googool00
+    command: mongod --auth --bind_ip_all
 
   meilisearch:
     container_name: chat-meilisearch
