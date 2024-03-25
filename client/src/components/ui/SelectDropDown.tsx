@@ -91,7 +91,9 @@ function SelectDropDown({
                     )}
                   >
                     {!showLabel && !emptyTitle && (
-                      <span className="text-xs text-gray-700 dark:text-gray-500">{title}:</span>
+                      <span className="text-xs text-gray-700 dark:text-gray-500">{title === 'gpt-4-turbo-preview'? (
+                        'gpt-4.5-turbo'
+                      ):  title  }:</span>
                     )}
                     {typeof value !== 'string' && value ? value?.label ?? '' : value ?? ''}
                   </span>
