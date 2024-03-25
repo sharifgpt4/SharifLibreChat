@@ -88,9 +88,9 @@ exports.callbackPayment = async (req, res) => {
       expiresAt: new Date(Date.now() + updatedPayment.subscription.duration * 24 * 60 * 60 * 1000), // Assuming duration is in days
     };
 
-    // Update user with new subscription details
+    // Update user with new subscription details. Replace existing subscriptions.
     await User.findByIdAndUpdate(user._id, {
-      $push: { activeSubscriptions: subscriptionDetails },
+      $set: { activeSubscriptions: [subscriptionDetails] }, // Sets activeSubscriptions to an array with only the latest subscription
     }, { new: true });
 
     // Create a transaction to add token credits to the user's balance
