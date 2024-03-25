@@ -77,7 +77,9 @@ function SelectDropDown({
                     id="headlessui-listbox-label-:r1:"
                     data-headlessui-state=""
                   >
-                    {title}
+                    {title === 'gpt-4-turbo-preview'? (
+                      'gpt-4.5-turbo'
+                    ):  title  }
                   </Listbox.Label>
                 )}
                 <span className="inline-flex w-full truncate">
