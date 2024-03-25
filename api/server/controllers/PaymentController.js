@@ -21,7 +21,7 @@ exports.createPayment = async (req, res) => {
       return res.status(404).send({ message: 'Subscription not found' });
     }
     console.log(subscription);
-    const amount = subscription.price.toString(); // Zibal might expect the amount as a string
+    const amount = (subscription.price * 10).toString(); // Zibal might expect the amount as a string
 
     // Define callback URL dynamically
     const baseUrl = process.env.BASE_URL || 'https://chat.qstarmachine.com'; // Adjust according to your environment setup
