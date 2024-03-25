@@ -65,6 +65,8 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=Googool00
     command: mongod --auth --bind_ip_all
+    ports:
+      - '127.0.0.1:27018:27017'
 
   meilisearch:
     container_name: chat-meilisearch
