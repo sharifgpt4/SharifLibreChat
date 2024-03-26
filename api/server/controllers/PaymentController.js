@@ -78,7 +78,7 @@ exports.callbackPayment = async (req, res) => {
     });
     zibal.verify({trackId})
       .then((result) => {
-        log("RESULT HEREEE")
+        console.log("RESULT HEREEE")
         console.log(result);
         // { paidAt: '2018-03-25T23:43:01.053000', amount: 1600, result: 100, status: 1, message : 'success', statusMessage: 'با موفقیت تایید شد.' }
       }).catch((err) => {
@@ -86,8 +86,7 @@ exports.callbackPayment = async (req, res) => {
       // { result: 103, message: 'authentication error', statusMessage: '{merchant} غیرفعال' }
       });
 
-    zibal.verify(trackId);
-
+    console.log("Zibal DOne...")
     const User = require('../../models/User'); // Adjust the path as necessary
     const Transaction = require('../../models/Transaction'); // Ensure you have a Transaction model to create transactions
 
