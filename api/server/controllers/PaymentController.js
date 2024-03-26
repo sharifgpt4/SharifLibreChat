@@ -73,7 +73,7 @@ exports.callbackPayment = async (req, res) => {
 
     try {
       const verifyResult = await zibal.verify({ trackId });
-      console.log(verifyResult);
+      console.log(verifyResult.success);
     } catch (err) {
       console.error(err);
       // Handle the error appropriately
