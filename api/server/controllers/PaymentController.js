@@ -7,8 +7,8 @@ const User = require("~/models/User"); // Adjust the path as necessary
 // Create a new payment and initiate a payment request
 exports.createPayment = async (req, res) => {
   let zibal = new Zibal({
-    //merchant: '65a14466c5d2cb001d8d45ce',
-    merchant: 'zibal', // TEST
+    merchant: '65a14466c5d2cb001d8d45ce',
+    //merchant: 'zibal', // TEST
     logLevel: 2,
   });
 
