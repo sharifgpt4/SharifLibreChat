@@ -82,13 +82,8 @@ exports.callbackPayment = async (req, res) => {
       console.log(verifyResult.success);
     } catch (err) {
       console.error(err);
-      if (verifyResult.success == "false"){
-        return res.status(400).send({ message: 'Arleady Verified' });
-
-      }
-      // Handle the error appropriately
-      // For example, you might want to log the error and stop further execution:
-      return res.status(500).send({ message: 'Error verifying payment with Zibal.' });
+     
+      return res.status(400).send({ message: 'Arleady Verified' });
     }
     
 
