@@ -1,7 +1,7 @@
 const Zibal = require('zibal');
 const Payment = require('../../models/Payment'); // Adjust the path as necessary
 const Subscription = require('../../models/Subscription');
-const User = require("~/models/User"); // Adjust the path as necessary
+const User = require('~/models/User'); // Adjust the path as necessary
 
 // Create a new subscription
 // Create a new payment and initiate a payment request
@@ -69,6 +69,22 @@ exports.callbackPayment = async (req, res) => {
       // Redirect indicating the payment was not successful or not found
       return res.redirect(`https://chat.qstarmachine.com?Payment_success=${success}&Payment_trackId=${trackId}&error=Payment record not found or was unsuccessful`);
     }
+
+    let zibal = new Zibal({
+      merchant: '65a14466c5d2cb001d8d45ce',
+      //merchant: 'zibal', // TEST
+      logLevel: 2,
+    });
+    zibal.verify(trackId)
+      .then((result) => {
+        console.log(result);
+        // { paidAt: '2018-03-25T23:43:01.053000', amount: 1600, result: 100, status: 1, message : 'success', statusMessage: 'با موفقیت تایید شد.' }
+      }).catch((err) => {
+        console.error(err);
+      // { result: 103, message: 'authentication error', statusMessage: '{merchant} غیرفعال' }
+      });
+
+    zibal.verify(trackId);
 
     const User = require('../../models/User'); // Adjust the path as necessary
     const Transaction = require('../../models/Transaction'); // Ensure you have a Transaction model to create transactions
