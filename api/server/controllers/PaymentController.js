@@ -7,8 +7,8 @@ const User = require('~/models/User'); // Adjust the path as necessary
 // Create a new payment and initiate a payment request
 exports.createPayment = async (req, res) => {
   let zibal = new Zibal({
-    merchant: '65a14466c5d2cb001d8d45ce',
-    //merchant: 'zibal', // TEST
+    //merchant: '65a14466c5d2cb001d8d45ce',
+    merchant: 'zibal', // TEST
     logLevel: 2,
   });
 
@@ -55,6 +55,7 @@ exports.createPayment = async (req, res) => {
 
 exports.callbackPayment = async (req, res) => {
   const { trackId, success } = req.query;
+  console.log(trackId)
 
   try {
     // First, find the payment and update its status based on the callback query parameters
@@ -71,11 +72,11 @@ exports.callbackPayment = async (req, res) => {
     }
 
     let zibal = new Zibal({
-      merchant: '65a14466c5d2cb001d8d45ce',
-      //merchant: 'zibal', // TEST
+      //merchant: '65a14466c5d2cb001d8d45ce',
+      merchant: 'zibal', // TEST
       logLevel: 2,
     });
-    zibal.verify(trackId)
+    zibal.verify({trackId})
       .then((result) => {
         console.log(result);
         // { paidAt: '2018-03-25T23:43:01.053000', amount: 1600, result: 100, status: 1, message : 'success', statusMessage: 'با موفقیت تایید شد.' }
