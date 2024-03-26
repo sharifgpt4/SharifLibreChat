@@ -7,8 +7,8 @@ const User = require('~/models/User'); // Adjust the path as necessary
 // Create a new payment and initiate a payment request
 exports.createPayment = async (req, res) => {
   let zibal = new Zibal({
-    //merchant: '65a14466c5d2cb001d8d45ce',
-    merchant: 'zibal', // TEST
+    merchant: '65a14466c5d2cb001d8d45ce',
+    //merchant: 'zibal', // TEST
     logLevel: 2,
   });
 
@@ -73,8 +73,8 @@ exports.callbackPayment = async (req, res) => {
 
     try {
       let zibal = new Zibal({
-        //merchant: '65a14466c5d2cb001d8d45ce',
-        merchant: 'zibal', // TEST
+        merchant: '65a14466c5d2cb001d8d45ce',
+        //merchant: 'zibal', // TEST
         logLevel: 2,
       });
     
@@ -82,7 +82,7 @@ exports.callbackPayment = async (req, res) => {
       console.log(verifyResult.success);
     } catch (err) {
       console.error(err);
-     
+      res.redirect(`https://chat.qstarmachine.com`);
       return res.status(400).send({ message: 'Arleady Verified' });
     }
     
