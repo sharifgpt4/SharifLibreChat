@@ -72,6 +72,12 @@ exports.callbackPayment = async (req, res) => {
     }
 
     try {
+      let zibal = new Zibal({
+        //merchant: '65a14466c5d2cb001d8d45ce',
+        merchant: 'zibal', // TEST
+        logLevel: 2,
+      });
+    
       const verifyResult = await zibal.verify({ trackId });
       console.log(verifyResult.success);
     } catch (err) {
