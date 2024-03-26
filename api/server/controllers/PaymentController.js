@@ -78,6 +78,7 @@ exports.callbackPayment = async (req, res) => {
     });
     zibal.verify({trackId})
       .then((result) => {
+        log("RESULT HEREEE")
         console.log(result);
         // { paidAt: '2018-03-25T23:43:01.053000', amount: 1600, result: 100, status: 1, message : 'success', statusMessage: 'با موفقیت تایید شد.' }
       }).catch((err) => {
@@ -96,7 +97,8 @@ exports.callbackPayment = async (req, res) => {
       console.error('User not found');
       return res.status(404).send({ message: 'User not found' });
     }
-
+    
+    console.log("Checking user Subs")
     // Check if the user already has an active subscription from this payment
     const alreadySubscribed = user.activeSubscriptions.some(subscriptionDetail =>
       subscriptionDetail.subscription.trackId === trackId,
@@ -126,6 +128,7 @@ exports.callbackPayment = async (req, res) => {
       context: 'payment',
       rawAmount: updatedPayment.subscription.tokenCreditsCost,
     });
+    console.log("add balance too user")
 
     // Redirect with payment success status
     res.redirect(`https://chat.qstarmachine.com?Payment_success=${success}&Payment_trackId=${trackId}`);
