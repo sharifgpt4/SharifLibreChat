@@ -199,7 +199,7 @@ l47 50 -30 63 c-38 79 -39 140 -5 223 14 33 25 67 25 76 0 18 -78 99 -96 99
                         ? 'cursor-pointer text-black dark:text-white'
                         : 'cursor-not-allowed text-black/50 dark:text-white/50',
                     )}
-                    svg={() => <Download size={16} />}
+                    svg={() => <Download size={ 16} />}
                     text={localize('com_nav_export_conversation')}
                     clickHandler={clickHandler}
                   />

@@ -95,7 +95,7 @@ function SelectDropDown({
                         'gpt-4.5-turbo'
                       ):  title  }:</span>
                     )}
-                    {typeof value !== 'string' && value ? value?.label ?? '' : value === 'gpt-4-turbo-preview'? 'gpt-4.5-turbo':  ''}
+                    {typeof value !== 'string' && value ? value?.label ?? '' : value === 'gpt-4-turbo-preview'? 'gpt-4.5-turbo':  value}
                   </span>
                 </span>
                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
@@ -171,7 +171,9 @@ function SelectDropDown({
                               iconSide === 'left' ? 'ml-4' : '',
                             )}
                           >
-                            {currentLabel}
+                            {currentLabel === 'gpt-4-turbo-preview'? (
+                              'gpt-4.5-turbo'
+                          ):  currentLabel  }
                           </span>
                           {currentValue === activeValue && (
                             <span

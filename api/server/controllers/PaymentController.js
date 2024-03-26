@@ -1,13 +1,14 @@
 const Zibal = require('zibal');
 const Payment = require('../../models/Payment'); // Adjust the path as necessary
-const Subscription = require('../../models/Subscription'); // Adjust the path as necessary
+const Subscription = require('../../models/Subscription');
+const User = require("~/models/User"); // Adjust the path as necessary
 
 // Create a new subscription
 // Create a new payment and initiate a payment request
 exports.createPayment = async (req, res) => {
   let zibal = new Zibal({
-    merchant: '65a14466c5d2cb001d8d45ce',
-    //merchant: 'zibal', // TEST
+    //merchant: '65a14466c5d2cb001d8d45ce',
+    merchant: 'zibal', // TEST
     logLevel: 2,
   });
 
@@ -21,7 +22,7 @@ exports.createPayment = async (req, res) => {
       return res.status(404).send({ message: 'Subscription not found' });
     }
     console.log(subscription);
-    const amount = (subscription.price * 10).toString(); // Zibal might expect the amount as a string
+    const amount = subscription.price.toString(); // Zibal might expect the amount as a string
 
     // Define callback URL dynamically
     const baseUrl = process.env.BASE_URL || 'https://chat.qstarmachine.com'; // Adjust according to your environment setup
@@ -69,31 +70,39 @@ exports.callbackPayment = async (req, res) => {
       return res.redirect(`https://chat.qstarmachine.com?Payment_success=${success}&Payment_trackId=${trackId}&error=Payment record not found or was unsuccessful`);
     }
 
-    // At this point, the payment is confirmed successful; proceed with related logics
-
     const User = require('../../models/User'); // Adjust the path as necessary
     const Transaction = require('../../models/Transaction'); // Ensure you have a Transaction model to create transactions
 
     // Find the user associated with the payment
-    const user = await User.findById(updatedPayment.user);
+    const user = await User.findById(updatedPayment.user).populate('activeSubscriptions.subscription');
     if (!user) {
       console.error('User not found');
       return res.status(404).send({ message: 'User not found' });
     }
 
-    // Add subscription details to the user's active subscriptions
-    const subscriptionDetails = {
-      subscription: updatedPayment.subscription._id,
-      activatedAt: new Date(),
-      expiresAt: new Date(Date.now() + updatedPayment.subscription.duration * 24 * 60 * 60 * 1000), // Assuming duration is in days
-    };
+    // Check if the user already has an active subscription from this payment
+    const alreadySubscribed = user.activeSubscriptions.some(subscriptionDetail =>
+      subscriptionDetail.subscription.trackId === trackId,
+    );
 
-    // Update user with new subscription details. Replace existing subscriptions.
-    await User.findByIdAndUpdate(user._id, {
-      $set: { activeSubscriptions: [subscriptionDetails] }, // Sets activeSubscriptions to an array with only the latest subscription
-    }, { new: true });
+    // If the user already has an active subscription for this trackId, prevent adding another
+    if (!alreadySubscribed) {
+      // Add subscription details to the user's active subscriptions
+      const subscriptionDetails = {
+        subscription: updatedPayment.subscription._id,
+        activatedAt: new Date(),
+        expiresAt: new Date(Date.now() + updatedPayment.subscription.duration * 24 * 60 * 60 * 1000), // Assuming duration is in days
+      };
 
-    // Create a transaction to add token credits to the user's balance
+      // Update user with new subscription details. Replace existing subscriptions.
+      await User.findByIdAndUpdate(user._id, {
+        $set: { activeSubscriptions: [subscriptionDetails] }, // Sets activeSubscriptions to an array with only the latest subscription
+      }, { new: true });
+    } else {
+      console.log('User already has this subscription active, skipping...');
+    }
+
+    // Regardless of subscription status, proceed with token credits addition for successful payment
     await Transaction.create({
       user: user._id,
       tokenType: 'credits',
