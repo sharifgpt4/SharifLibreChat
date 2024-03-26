@@ -71,20 +71,16 @@ exports.callbackPayment = async (req, res) => {
       return res.redirect(`https://chat.qstarmachine.com?Payment_success=${success}&Payment_trackId=${trackId}&error=Payment record not found or was unsuccessful`);
     }
 
-    let zibal = new Zibal({
-      //merchant: '65a14466c5d2cb001d8d45ce',
-      merchant: 'zibal', // TEST
-      logLevel: 2,
-    });
-    zibal.verify({trackId})
-      .then((result) => {
-        console.log("RESULT HEREEE")
-        console.log(result);
-        // { paidAt: '2018-03-25T23:43:01.053000', amount: 1600, result: 100, status: 1, message : 'success', statusMessage: 'با موفقیت تایید شد.' }
-      }).catch((err) => {
-        console.error(err);
-      // { result: 103, message: 'authentication error', statusMessage: '{merchant} غیرفعال' }
-      });
+    try {
+      const verifyResult = await zibal.verify({ trackId });
+      console.log(verifyResult);
+    } catch (err) {
+      console.error(err);
+      // Handle the error appropriately
+      // For example, you might want to log the error and stop further execution:
+      return res.status(500).send({ message: 'Error verifying payment with Zibal.' });
+    }
+    
 
     console.log("Zibal DOne...")
     const User = require('../../models/User'); // Adjust the path as necessary
