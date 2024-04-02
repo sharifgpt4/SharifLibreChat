@@ -43,9 +43,9 @@ exports.createPayment = async (req, res) => {
     });
 
     newPayment.trackId = zibalResult.trackId;
+    console.log(zibalResult);
     await newPayment.save();
 
-    console.log(zibalResult);
     res.status(200).send({ ...zibalResult, paymentId: newPayment.id, ...subscription });
   } catch (err) {
     console.error(err);
