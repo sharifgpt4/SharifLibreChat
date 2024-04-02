@@ -161,6 +161,8 @@ export default class Zibal {
         const { api, log } = Zibal
         const uri = `${api.base}/${path}`
         const proxyUrl = 'http://216.128.135.3:3128'; // The proxy server address
+        console.log(`USING PROXY FOR ZIBAL: ${proxyUrl}`)
+
         log(`POST: \n${JSON.stringify(body, null, 4)}\nTO: ${uri}`)
         request.post({
             uri,
