@@ -37,7 +37,7 @@ exports.createPayment = async (req, res) => {
       subscription: subscriptionId,
     });
 
-    const zibalResult = await zibal.request({
+    const zibalResult = await zibal.requestPayment({
       amount, // Use the fetched subscription price
       callbackUrl,
     });

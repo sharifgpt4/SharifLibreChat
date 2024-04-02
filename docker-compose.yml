@@ -4,7 +4,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: ./Dockerfile.api
       target: api-build
     container_name: LibreChat-API
     ports:
@@ -22,12 +22,11 @@ services:
       - ./api/app:/app/api/app # Dev Purpose only.
       - ./api/models:/app/api/models # Dev Purpose only.
       - ./api/server:/app/api/server # Dev Purpose only.
-      - ./api/node_modules:/app/api/node_modules # Dev Purpose only.
 
   client:
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: ./Dockerfile.client
       target: prod-stage
     container_name: LibreChat-NGINX
     ports:
@@ -41,7 +40,7 @@ services:
   admin:
     build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: ./Dockerfile.admin
       target: admin-build
     container_name: LibreChat-Admin
     ports:

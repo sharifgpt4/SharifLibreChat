@@ -40,7 +40,7 @@ class Zibal {
 		}
 	}
 
-	static request(amount, extras) {
+	static requestPayment(amount, extras) {
 		const { isConfigValid, config, errors, extractExtras, post, log, error } = Zibal
 		return new Promise((resolve, reject) => {
 			if (!isConfigValid) {
