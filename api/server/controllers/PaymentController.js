@@ -43,6 +43,7 @@ exports.createPayment = async (req, res) => {
     });
 
     newPayment.trackId = zibalResult.trackId;
+    console.log("Zibal Response:")
     console.log(zibalResult);
     await newPayment.save();
 
