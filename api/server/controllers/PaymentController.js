@@ -39,10 +39,7 @@ exports.createPayment = async (req, res) => {
       subscription: subscriptionId,
     });
 
-    const zibalResult = await Zibal.requestPayment({
-      amount, // Use the fetched subscription price
-      callbackUrl,
-    });
+    const zibalResult = await Zibal.requestPayment(amount);
 
     newPayment.trackId = zibalResult.trackId;
     console.log("Zibal Response:")
@@ -83,7 +80,7 @@ exports.callbackPayment = async (req, res) => {
       });
       
     
-      const verifyResult = await Zibal.verify({ trackId });
+      const verifyResult = await Zibal.verify(trackId);
       console.log(verifyResult.success);
     } catch (err) {
       console.error(err);
