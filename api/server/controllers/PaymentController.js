@@ -6,11 +6,13 @@ const User = require('~/models/User'); // Adjust the path as necessary
 // Create a new subscription
 // Create a new payment and initiate a payment request
 exports.createPayment = async (req, res) => {
-
+  const baseUrl = process.env.BASE_URL || 'https://chat.qstarmachine.com'; // Adjust according to your environment setup
+  const callbackUrl = `${baseUrl}/api/payment/callback`;
   Zibal.init({
     merchant: '65a14466c5d2cb001d8d45ce',
     //merchant: 'zibal', // TEST
     logLevel: 2,
+    callbackUrl: callbackUrl,
   });
   
 
@@ -27,9 +29,7 @@ exports.createPayment = async (req, res) => {
     const amount = (subscription.price * 10).toString(); // Zibal might expect the amount as a string
 
     // Define callback URL dynamically
-    const baseUrl = process.env.BASE_URL || 'https://chat.qstarmachine.com'; // Adjust according to your environment setup
 
-    const callbackUrl = `${baseUrl}/api/payment/callback`;
 
     let newPayment = new Payment({
       user: currentUser.id,
