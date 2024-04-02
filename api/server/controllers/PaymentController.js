@@ -1,4 +1,4 @@
-const Zibal = require('zibal');
+const Zibal = require('../services/zibal');
 const Payment = require('../../models/Payment'); // Adjust the path as necessary
 const Subscription = require('../../models/Subscription');
 const User = require('~/models/User'); // Adjust the path as necessary
