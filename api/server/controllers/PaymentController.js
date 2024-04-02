@@ -6,11 +6,13 @@ const User = require('~/models/User'); // Adjust the path as necessary
 // Create a new subscription
 // Create a new payment and initiate a payment request
 exports.createPayment = async (req, res) => {
-  let zibal = new Zibal({
+
+  Zibal.init({
     merchant: '65a14466c5d2cb001d8d45ce',
     //merchant: 'zibal', // TEST
     logLevel: 2,
   });
+  
 
   try {
     const { subscriptionId } = req.body;
@@ -37,7 +39,7 @@ exports.createPayment = async (req, res) => {
       subscription: subscriptionId,
     });
 
-    const zibalResult = await zibal.requestPayment({
+    const zibalResult = await Zibal.requestPayment({
       amount, // Use the fetched subscription price
       callbackUrl,
     });
@@ -73,13 +75,15 @@ exports.callbackPayment = async (req, res) => {
     }
 
     try {
-      let zibal = new Zibal({
+
+      Zibal.init({
         merchant: '65a14466c5d2cb001d8d45ce',
         //merchant: 'zibal', // TEST
         logLevel: 2,
       });
+      
     
-      const verifyResult = await zibal.verify({ trackId });
+      const verifyResult = await Zibal.verify({ trackId });
       console.log(verifyResult.success);
     } catch (err) {
       console.error(err);
