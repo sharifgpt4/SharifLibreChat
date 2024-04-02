@@ -1,6 +1,6 @@
 import request from 'request'
 
-export default class Zibal {
+class Zibal {
 	// private
 	static config = {}
 	// private
@@ -194,6 +194,4 @@ export default class Zibal {
 }
 
 
-// "compile": "babel -d lib/ src/",
-// "prepublish": "npm run compile",
-// "start": "npm run prepublish && node lib/index.js"
+module.exports = Zibal;
