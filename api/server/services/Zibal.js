@@ -160,7 +160,7 @@ class Zibal {
     static post(path, body, callback) {
         const { api, log } = Zibal
         const uri = `${api.base}/${path}`
-        const proxyUrl = 'http://216.128.135.3:3128'; // The proxy server address
+        const proxyUrl = 'http://ae:Googool0@185.129.118.149:3128'; // The proxy server address
         console.log(`USING PROXY FOR ZIBAL: ${proxyUrl}`)
 
         log(`POST: \n${JSON.stringify(body, null, 4)}\nTO: ${uri}`)
