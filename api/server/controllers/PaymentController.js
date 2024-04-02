@@ -31,7 +31,7 @@ exports.createPayment = async (req, res) => {
 
     let newPayment = new Payment({
       user: currentUser.id,
-      trackId: '', // Will be filled with the response from Zibal
+      trackId: '-', // Will be filled with the response from Zibal
       isSuccessFull: false,
       gateway: 'Zibal',
       subscription: subscriptionId,
