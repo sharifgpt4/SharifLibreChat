@@ -22,6 +22,7 @@ services:
       - ./api/app:/app/api/app # Dev Purpose only.
       - ./api/models:/app/api/models # Dev Purpose only.
       - ./api/server:/app/api/server # Dev Purpose only.
+      - ./api/node_modules:/app/api/node_modules # Dev Purpose only.
 
   client:
     build:
