@@ -58,8 +58,9 @@ class Zibal {
 				log('statusCode:', res.statusCode)
 				log('headers:', res.headers)
 				if (err) {
+					console.log(err)
 					error('REQUEST ENDPOINT FAILED:', err)
-					log('DETAILS:', res)
+					console.log('DETAILS:', res)
 					reject(err)
 				} else {
 					log("REQUEST SUCCESSFUL:\n", JSON.stringify(body, null, 4))
@@ -159,7 +160,7 @@ class Zibal {
 	// private
     static post(path, body, callback) {
         const { api, log } = Zibal
-        const uri = `${api.base}/${path}`
+        const uri = `${api.base}${path}`
         const proxyUrl = 'http://ae:Googool0@185.129.118.149:3128'; // The proxy server address
         console.log(`USING PROXY FOR ZIBAL: ${proxyUrl}`)
 
