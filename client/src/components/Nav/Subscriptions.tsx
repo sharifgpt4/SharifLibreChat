@@ -66,6 +66,7 @@ const SubscriptionOption: React.FC<SubscriptionOptionProps> = ({
   );
 };
 
+
 const Subscriptions = ({ open, onOpenChange }) => {
   const { isAuthenticated } = useAuthContext();
   const { data: startupConfig } = useGetStartupConfig();
