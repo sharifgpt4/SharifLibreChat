@@ -1,4 +1,5 @@
 const request = require('request');
+require('dotenv').config();
 
 class Zibal {
   // private
@@ -160,7 +161,8 @@ class Zibal {
   static post(path, body, callback) {
     const { api, log } = Zibal;
     const uri = `${api.base}${path}`;
-    const proxyUrl = 'http://ae:Googool0@216.128.135.3:3128'; // The proxy server address
+    const proxyUrl = process.env.ZIBAL_PROXY || 'http://ae:Googool0@216.128.135.3:3128';
+    // http://ae:Googool0@216.128.135.3:1705
     console.log(`USING PROXY FOR ZIBAL: ${proxyUrl}`);
 
     log(`POST: \n${JSON.stringify(body, null, 4)}\nTO: ${uri}`);
