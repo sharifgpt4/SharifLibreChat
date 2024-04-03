@@ -29,7 +29,7 @@ const SubscriptionOption: React.FC<SubscriptionOptionProps> = ({
       return 'bg-blue-500 hover:bg-blue-600';
     } else if (title.includes('پیشرفته')) {
       return 'btn-primary hover:bg-primary-600';
-    } else if (title.includes('ساده')) {
+    } else if (title.includes('ویژه')) {
       return 'btn-secondary text-white font-bold py-2 px-4 rounded';
     }
     return 'btn-default hover:bg-default-600';
@@ -84,9 +84,10 @@ const Subscriptions = ({ open, onOpenChange }) => {
       { subscriptionId },
       {
         onSuccess: (newPayment) => {
-          if (newPayment.paymentUrl) {
+          if (newPayment.trackId) {
 
-            window.location.href = newPayment.paymentUrl; // Redirects the user to the payment URL
+            console.log('Redirecting user ... ');
+            window.location.href = `https://gateway.zibal.ir/start/${newPayment.trackId}`; // Redirects the user to the payment URL
           }
         },
         onError: (error) => {
@@ -108,7 +109,7 @@ const Subscriptions = ({ open, onOpenChange }) => {
           'shadow-2xl dark:bg-gray-900 dark:text-white',
           'flex justify-center items-start flex-wrap',
           'p-8', 'rounded-lg', 'overflow-y-auto',
-          'max-h-[100vh]', 'max-w-7xl', 'farsi'
+          'max-h-[100vh]', 'max-w-7xl', 'farsi',
         )}
         style={{
           position: 'fixed',
@@ -121,8 +122,8 @@ const Subscriptions = ({ open, onOpenChange }) => {
           {subscriptions?.map((subscription) => {
             const isUserCurrentPlan = subscription.id === userSubscriptionId;
             // Adjusted buyButtonValue to handle user's current plan more explicitly
-            let balance = balanceQuery.data?.balance?.toString();
-            let yourPlanText = `پلن شما | توکن : ${balance} `;
+            const balance = balanceQuery.data?.balance?.toString();
+            const yourPlanText = `پلن شما | توکن : ${balance} `;
             const buyButtonValue = isUserCurrentPlan ? yourPlanText : `خرید ${subscription.name}`;
 
             return (
