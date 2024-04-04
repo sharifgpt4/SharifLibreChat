@@ -2,14 +2,17 @@ const Zibal = require('../services/Zibal');
 const Payment = require('../../models/Payment'); // Adjust the path as necessary
 const Subscription = require('../../models/Subscription');
 const User = require('~/models/User'); // Adjust the path as necessary
+require('dotenv').config();
 
 // Create a new subscription
 // Create a new payment and initiate a payment request
 exports.createPayment = async (req, res) => {
   const baseUrl = process.env.BASE_URL || 'https://chat.qstarmachine.com'; // Adjust according to your environment setup
   const callbackUrl = `${baseUrl}/api/payment/callback`;
+  const merchant = process.env.ZIBAL_MERCHANT ; // Adjust according to your environment setup
+
   Zibal.init({
-    merchant: '65a14466c5d2cb001d8d45ce',
+    merchant: merchant,
     //merchant: 'zibal', // TEST
     logLevel: 2,
     callbackUrl: callbackUrl,
@@ -72,8 +75,10 @@ exports.callbackPayment = async (req, res) => {
     try {
       const baseUrl = process.env.BASE_URL || 'https://chat.qstarmachine.com'; // Adjust according to your environment setup
       const callbackUrl = `${baseUrl}/api/payment/callback`;
+      const merchant = process.env.ZIBAL_MERCHANT ; // Adjust according to your environment setup
+
       Zibal.init({
-        merchant: '65a14466c5d2cb001d8d45ce',
+        merchant: merchant,
         //merchant: 'zibal', // TEST
         logLevel: 2,
         callbackUrl: callbackUrl,
