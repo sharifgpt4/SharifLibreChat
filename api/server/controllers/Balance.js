@@ -2,6 +2,7 @@ const User = require('../../models/User'); // Make sure this path is correct
 const Balance = require('../../models/Balance'); // Adjust the path as necessary
 
 async function balanceController(req, res) {
+  
 
   try {
     // Find the user and their active subscriptions

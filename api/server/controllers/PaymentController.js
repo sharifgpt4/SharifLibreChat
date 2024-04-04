@@ -72,11 +72,13 @@ exports.callbackPayment = async (req, res) => {
     }
 
     try {
-
+      const baseUrl = process.env.BASE_URL || 'https://chat.qstarmachine.com'; // Adjust according to your environment setup
+      const callbackUrl = `${baseUrl}/api/payment/callback`;
       Zibal.init({
         merchant: '65a14466c5d2cb001d8d45ce',
         //merchant: 'zibal', // TEST
         logLevel: 2,
+        callbackUrl: callbackUrl,
       });
       
     
