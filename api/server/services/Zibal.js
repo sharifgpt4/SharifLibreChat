@@ -161,8 +161,6 @@ class Zibal {
   static post(path, body, callback) {
     const { api, log } = Zibal;
     const uri = `${api.base}${path}`;
-    console.log(`USING PROXY FOR ZIBAL: ${proxyUrl}`);
-
     log(`POST: \n${JSON.stringify(body, null, 4)}\nTO: ${uri}`);
     request.post({
       uri,
