@@ -28,11 +28,21 @@ const SubscriptionOption = ({
 }) => {
   const isSmallScreen = useMediaQuery('(max-width: 1000px)');
   const formattedPrice = price.toLocaleString();
-  const getButtonClass = (isUserCurrentPlan) => {
-    // This function remains the same
+  const getButtonClass = (isUserCurrentPlan: boolean) => {
+    if (isUserCurrentPlan) {
+      return 'bg-gray-500 text-white font-bold py-2 px-4 rounded opacity-50 cursor-not-allowed';
+    } else if (title.includes('سازمان')) {
+      return 'bg-blue-500 hover:bg-blue-600';
+    } else if (title.includes('پیشرفته')) {
+      return 'btn-primary hover:bg-primary-600';
+    } else if (title.includes('ویژه')) {
+      return 'btn-secondary text-white font-bold py-2 px-4 rounded';
+    }
+    return 'btn-default hover:bg-default-600';
   };
+
   const buttonClass = getButtonClass(isUserCurrentPlan);
-  const buttonContent = isLoading ? 'Loading...' : buyButtonValue; // Change button text based on loading state
+  const buttonContent = isLoading ? 'انتقال به درگاه پرداخت...' : buyButtonValue; // Change button text based on loading state
 
   return (
     <div style={{ direction: 'rtl' }} className={cn(
@@ -74,20 +84,24 @@ const Subscriptions = ({ open, onOpenChange }) => {
   const navigate = useNavigate();
   const [loadingSubscriptionId, setLoadingSubscriptionId] = useState(null); // State to track the subscription ID being processed
 
-  const handleSubscribe = (subscriptionId) => {
-    setLoadingSubscriptionId(subscriptionId); // Indicate which subscription is loading
+  const handleSubscribe = (subscriptionId: string) => {
+    if (balanceQuery.data?.hasSubscription) {
+      console.log('User already has a subscription');
+    }
     createPaymentMutation.mutate(
       { subscriptionId },
       {
-        onSuccess: () => {
-          // Handle success, such as navigation or updating UI
-          setLoadingSubscriptionId(null); // Reset loading state
+        onSuccess: (newPayment) => {
+          if (newPayment.trackId) {
+
+            console.log('Redirecting user ... ');
+            window.location.href = `https://gateway.zibal.ir/start/${newPayment.trackId}`; // Redirects the user to the payment URL
+          }
         },
-        onError: () => {
-          // Optionally handle error
-          setLoadingSubscriptionId(null); // Reset loading state on error too
+        onError: (error) => {
+          console.error('Error creating payment:', error);
         },
-      }
+      },
     );
   };
 
