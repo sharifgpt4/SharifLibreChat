@@ -84,7 +84,9 @@ const Subscriptions = ({ open, onOpenChange }) => {
   const navigate = useNavigate();
   const [loadingSubscriptionId, setLoadingSubscriptionId] = useState(null); // State to track the subscription ID being processed
 
-  const handleSubscribe = (subscriptionId: string) => {
+  const handleSubscribe = (subscriptionId) => {
+    setLoadingSubscriptionId(subscriptionId); // Indicate which subscription is loading
+
     if (balanceQuery.data?.hasSubscription) {
       console.log('User already has a subscription');
     }
@@ -97,9 +99,13 @@ const Subscriptions = ({ open, onOpenChange }) => {
             console.log('Redirecting user ... ');
             window.location.href = `https://gateway.zibal.ir/start/${newPayment.trackId}`; // Redirects the user to the payment URL
           }
+          setLoadingSubscriptionId(null); // Reset loading state
+
         },
         onError: (error) => {
           console.error('Error creating payment:', error);
+          setLoadingSubscriptionId(null); // Reset loading state on error too
+
         },
       },
     );
