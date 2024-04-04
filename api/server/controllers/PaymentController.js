@@ -14,7 +14,6 @@ exports.createPayment = async (req, res) => {
     logLevel: 2,
     callbackUrl: callbackUrl,
   });
-  
 
   try {
     const { subscriptionId } = req.body;
@@ -30,7 +29,6 @@ exports.createPayment = async (req, res) => {
 
     // Define callback URL dynamically
 
-
     let newPayment = new Payment({
       user: currentUser.id,
       trackId: '-', // Will be filled with the response from Zibal
@@ -42,7 +40,7 @@ exports.createPayment = async (req, res) => {
     const zibalResult = await Zibal.requestPayment(amount);
 
     newPayment.trackId = zibalResult.trackId;
-    console.log("Zibal Response:")
+    console.log('Zibal Response:');
     console.log(zibalResult);
     await newPayment.save();
 
@@ -55,7 +53,7 @@ exports.createPayment = async (req, res) => {
 
 exports.callbackPayment = async (req, res) => {
   const { trackId, success } = req.query;
-  console.log(trackId)
+  console.log(trackId);
 
   try {
     // First, find the payment and update its status based on the callback query parameters
@@ -80,18 +78,16 @@ exports.callbackPayment = async (req, res) => {
         logLevel: 2,
         callbackUrl: callbackUrl,
       });
-      
-    
+
       const verifyResult = await Zibal.verify(trackId);
       console.log(verifyResult.success);
     } catch (err) {
       console.error(err);
-      res.redirect(`https://chat.qstarmachine.com`);
+      res.redirect('https://chat.qstarmachine.com');
       return res.status(400).send({ message: 'Arleady Verified' });
     }
-    
 
-    console.log("Zibal DOne...")
+    console.log('Zibal DOne...');
     const User = require('../../models/User'); // Adjust the path as necessary
     const Transaction = require('../../models/Transaction'); // Ensure you have a Transaction model to create transactions
 
@@ -101,8 +97,8 @@ exports.callbackPayment = async (req, res) => {
       console.error('User not found');
       return res.status(404).send({ message: 'User not found' });
     }
-    
-    console.log("Checking user Subs")
+
+    console.log('Checking user Subs');
     // Check if the user already has an active subscription from this payment
     const alreadySubscribed = user.activeSubscriptions.some(subscriptionDetail =>
       subscriptionDetail.subscription.trackId === trackId,
@@ -132,7 +128,7 @@ exports.callbackPayment = async (req, res) => {
       context: 'payment',
       rawAmount: updatedPayment.subscription.tokenCreditsCost,
     });
-    console.log("add balance too user")
+    console.log('add balance too user');
 
     // Redirect with payment success status
     res.redirect(`https://chat.qstarmachine.com?Payment_success=${success}&Payment_trackId=${trackId}`);
