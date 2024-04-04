@@ -6,7 +6,7 @@ class Zibal {
   static config = {};
   // private
   static api = {
-    base: 'https://worker-proud-poetry-7163.mkydr.workers.dev/proxy?modify&proxyUrl=https://gateway.zibal.ir/v1/request',
+    base: 'https://worker-proud-poetry-7163.mkydr.workers.dev/proxy?modify&proxyUrl=https://gateway.zibal.ir/v1/',
   };
 
   static extraProperties = [
