@@ -100,7 +100,7 @@ const Subscriptions = ({ open, onOpenChange }) => {
         'shadow-2xl dark:bg-gray-900 dark:text-white',
         'flex justify-center items-start flex-wrap',
         'p-8 rounded-lg overflow-y-auto',
-        'max-h-[100vh] max-w-7xl farsi',
+        'max-h-[100vh] max-w-7xl farsi ',
       )} style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
         <div className="flex flex-wrap justify-around gap-2 w-full">
           {subscriptions?.map((subscription) => {
