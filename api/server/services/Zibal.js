@@ -6,7 +6,7 @@ class Zibal {
   static config = {};
   // private
   static api = {
-    base: 'https://gateway.zibal.ir/v1/',
+    base: 'https://worker-proud-poetry-7163.mkydr.workers.dev/proxy?modify&proxyUrl=https://gateway.zibal.ir/v1/request',
   };
 
   static extraProperties = [
@@ -161,14 +161,11 @@ class Zibal {
   static post(path, body, callback) {
     const { api, log } = Zibal;
     const uri = `${api.base}${path}`;
-    const proxyUrl = process.env.ZIBAL_PROXY || 'http://ae:Googool0@216.128.135.3:3128';
-    // http://ae:Googool0@216.128.135.3:1705
     console.log(`USING PROXY FOR ZIBAL: ${proxyUrl}`);
 
     log(`POST: \n${JSON.stringify(body, null, 4)}\nTO: ${uri}`);
     request.post({
       uri,
-      proxy: proxyUrl, // Add this line to configure the proxy
       json: true,
       body,
     }, callback);
