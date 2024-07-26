@@ -30,6 +30,14 @@ const defaultContextValue: ProviderValue = {
     return;
   },
 };
+
+export const isDark = (theme: string): boolean => {
+  if (theme === 'system') {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  return theme === 'dark';
+};
+
 export const ThemeContext = createContext<ProviderValue>(defaultContextValue);
 
 export const ThemeProvider = ({ initialTheme, children }) => {
@@ -37,17 +45,26 @@ export const ThemeProvider = ({ initialTheme, children }) => {
 
   const rawSetTheme = (rawTheme: string) => {
     const root = window.document.documentElement;
-    let isDark = rawTheme === 'dark';
+    const darkMode = isDark(rawTheme);
 
-    if (rawTheme === 'system') {
-      isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
-
-    root.classList.remove(isDark ? 'light' : 'dark');
-    root.classList.add(isDark ? 'dark' : 'light');
+    root.classList.remove(darkMode ? 'light' : 'dark');
+    root.classList.add(darkMode ? 'dark' : 'light');
 
     localStorage.setItem('color-theme', rawTheme);
   };
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const changeThemeOnSystemChange = () => {
+      rawSetTheme(mediaQuery.matches ? 'dark' : 'light');
+    };
+
+    mediaQuery.addEventListener('change', changeThemeOnSystemChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', changeThemeOnSystemChange);
+    };
+  }, []);
 
   if (initialTheme) {
     rawSetTheme(initialTheme);

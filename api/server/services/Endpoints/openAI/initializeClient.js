@@ -1,11 +1,12 @@
 const {
+  ErrorTypes,
   EModelEndpoint,
-  mapModelToAzureConfig,
   resolveHeaders,
+  mapModelToAzureConfig,
 } = require('librechat-data-provider');
-const { getUserKey, checkUserKeyExpiry } = require('~/server/services/UserService');
+const { getUserKeyValues, checkUserKeyExpiry } = require('~/server/services/UserService');
+const { isEnabled, isUserProvided } = require('~/server/utils');
 const { getAzureCredentials } = require('~/utils');
-const { isEnabled } = require('~/server/utils');
 const { OpenAIClient } = require('~/app');
 
 const initializeClient = async ({ req, res, endpointOption }) => {
@@ -21,40 +22,38 @@ const initializeClient = async ({ req, res, endpointOption }) => {
   const { key: expiresAt, endpoint, model: modelName } = req.body;
   const contextStrategy = isEnabled(OPENAI_SUMMARIZE) ? 'summarize' : null;
 
+  const credentials = {
+    [EModelEndpoint.openAI]: OPENAI_API_KEY,
+    [EModelEndpoint.azureOpenAI]: AZURE_API_KEY,
+  };
+
   const baseURLOptions = {
     [EModelEndpoint.openAI]: OPENAI_REVERSE_PROXY,
     [EModelEndpoint.azureOpenAI]: AZURE_OPENAI_BASEURL,
   };
 
-  const reverseProxyUrl = baseURLOptions[endpoint] ?? null;
+  const userProvidesKey = isUserProvided(credentials[endpoint]);
+  const userProvidesURL = isUserProvided(baseURLOptions[endpoint]);
+
+  let userValues = null;
+  if (expiresAt && (userProvidesKey || userProvidesURL)) {
+    checkUserKeyExpiry(expiresAt, endpoint);
+    userValues = await getUserKeyValues({ userId: req.user.id, name: endpoint });
+  }
+
+  let apiKey = userProvidesKey ? userValues?.apiKey : credentials[endpoint];
+  let baseURL = userProvidesURL ? userValues?.baseURL : baseURLOptions[endpoint];
 
   const clientOptions = {
     debug: isEnabled(DEBUG_OPENAI),
     contextStrategy,
-    reverseProxyUrl,
+    reverseProxyUrl: baseURL ? baseURL : null,
     proxy: PROXY ?? null,
     req,
     res,
     ...endpointOption,
   };
 
-  const credentials = {
-    [EModelEndpoint.openAI]: OPENAI_API_KEY,
-    [EModelEndpoint.azureOpenAI]: AZURE_API_KEY,
-  };
-
-  const isUserProvided = credentials[endpoint] === 'user_provided';
-
-  let userKey = null;
-  if (expiresAt && isUserProvided) {
-    checkUserKeyExpiry(
-      expiresAt,
-      'Your OpenAI API key has expired. Please provide your API key again.',
-    );
-    userKey = await getUserKey({ userId: req.user.id, name: endpoint });
-  }
-
-  let apiKey = isUserProvided ? userKey : credentials[endpoint];
   const isAzureOpenAI = endpoint === EModelEndpoint.azureOpenAI;
   /** @type {false | TAzureConfig} */
   const azureConfig = isAzureOpenAI && req.app.locals[EModelEndpoint.azureOpenAI];
@@ -77,6 +76,10 @@ const initializeClient = async ({ req, res, endpointOption }) => {
 
     clientOptions.titleConvo = azureConfig.titleConvo;
     clientOptions.titleModel = azureConfig.titleModel;
+
+    const azureRate = modelName.includes('gpt-4') ? 30 : 17;
+    clientOptions.streamRate = azureConfig.streamRate ?? azureRate;
+
     clientOptions.titleMethod = azureConfig.titleMethod ?? 'completion';
 
     const groupName = modelGroupMap[modelName].group;
@@ -87,12 +90,33 @@ const initializeClient = async ({ req, res, endpointOption }) => {
     apiKey = azureOptions.azureOpenAIApiKey;
     clientOptions.azure = !serverless && azureOptions;
   } else if (isAzureOpenAI) {
-    clientOptions.azure = isUserProvided ? JSON.parse(userKey) : getAzureCredentials();
+    clientOptions.azure = userProvidesKey ? JSON.parse(userValues.apiKey) : getAzureCredentials();
     apiKey = clientOptions.azure.azureOpenAIApiKey;
   }
 
+  /** @type {undefined | TBaseEndpoint} */
+  const openAIConfig = req.app.locals[EModelEndpoint.openAI];
+
+  if (!isAzureOpenAI && openAIConfig) {
+    clientOptions.streamRate = openAIConfig.streamRate;
+  }
+
+  /** @type {undefined | TBaseEndpoint} */
+  const allConfig = req.app.locals.all;
+  if (allConfig) {
+    clientOptions.streamRate = allConfig.streamRate;
+  }
+
+  if (userProvidesKey & !apiKey) {
+    throw new Error(
+      JSON.stringify({
+        type: ErrorTypes.NO_USER_KEY,
+      }),
+    );
+  }
+
   if (!apiKey) {
-    throw new Error(`${endpoint} API key not provided.`);
+    throw new Error(`${endpoint} API Key not provided.`);
   }
 
   const client = new OpenAIClient(apiKey, clientOptions);

@@ -1,5 +1,6 @@
-const { AnthropicClient } = require('~/app');
+const { EModelEndpoint } = require('librechat-data-provider');
 const { getUserKey, checkUserKeyExpiry } = require('~/server/services/UserService');
+const { AnthropicClient } = require('~/app');
 
 const initializeClient = async ({ req, res, endpointOption }) => {
   const { ANTHROPIC_API_KEY, ANTHROPIC_REVERSE_PROXY, PROXY } = process.env;
@@ -7,14 +8,30 @@ const initializeClient = async ({ req, res, endpointOption }) => {
   const isUserProvided = ANTHROPIC_API_KEY === 'user_provided';
 
   const anthropicApiKey = isUserProvided
-    ? await getAnthropicUserKey(req.user.id)
+    ? await getUserKey({ userId: req.user.id, name: EModelEndpoint.anthropic })
     : ANTHROPIC_API_KEY;
 
+  if (!anthropicApiKey) {
+    throw new Error('Anthropic API key not provided. Please provide it again.');
+  }
+
   if (expiresAt && isUserProvided) {
-    checkUserKeyExpiry(
-      expiresAt,
-      'Your ANTHROPIC_API_KEY has expired. Please provide your API key again.',
-    );
+    checkUserKeyExpiry(expiresAt, EModelEndpoint.anthropic);
+  }
+
+  const clientOptions = {};
+
+  /** @type {undefined | TBaseEndpoint} */
+  const anthropicConfig = req.app.locals[EModelEndpoint.anthropic];
+
+  if (anthropicConfig) {
+    clientOptions.streamRate = anthropicConfig.streamRate;
+  }
+
+  /** @type {undefined | TBaseEndpoint} */
+  const allConfig = req.app.locals.all;
+  if (allConfig) {
+    clientOptions.streamRate = allConfig.streamRate;
   }
 
   const client = new AnthropicClient(anthropicApiKey, {
@@ -22,6 +39,7 @@ const initializeClient = async ({ req, res, endpointOption }) => {
     res,
     reverseProxyUrl: ANTHROPIC_REVERSE_PROXY ?? null,
     proxy: PROXY ?? null,
+    ...clientOptions,
     ...endpointOption,
   });
 
@@ -29,10 +47,6 @@ const initializeClient = async ({ req, res, endpointOption }) => {
     client,
     anthropicApiKey,
   };
-};
-
-const getAnthropicUserKey = async (userId) => {
-  return await getUserKey({ userId, name: 'anthropic' });
 };
 
 module.exports = initializeClient;

@@ -2,18 +2,20 @@ require('dotenv').config();
 const path = require('path');
 require('module-alias')({ base: path.resolve(__dirname, '..') });
 const cors = require('cors');
+const axios = require('axios');
 const express = require('express');
 const passport = require('passport');
 const mongoSanitize = require('express-mongo-sanitize');
-const errorController = require('./controllers/ErrorController');
 const { jwtLogin, passportLogin } = require('~/strategies');
-const configureSocialLogins = require('./socialLogins');
 const { connectDb, indexSync } = require('~/lib/db');
+const { isEnabled } = require('~/server/utils');
+const { ldapLogin } = require('~/strategies');
+const { logger } = require('~/config');
+const validateImageRequest = require('./middleware/validateImageRequest');
+const errorController = require('./controllers/ErrorController');
+const configureSocialLogins = require('./socialLogins');
 const AppService = require('./services/AppService');
 const noIndex = require('./middleware/noIndex');
-const { isEnabled } = require('~/server/utils');
-const { logger } = require('~/config');
-
 const routes = require('./routes');
 
 const { PORT, HOST, ALLOW_SOCIAL_LOGIN } = process.env ?? {};
@@ -21,7 +23,17 @@ const { PORT, HOST, ALLOW_SOCIAL_LOGIN } = process.env ?? {};
 const port = Number(PORT) || 3080;
 const host = HOST || 'localhost';
 
+const corsOptions = {
+  origin: ['http://localhost:3000', 'http://localhost:3080', 'https://admin.qstarmachine.com', 'https://qstarmachine.com'], // Allowed origins
+  optionsSuccessStatus: 200, // For legacy browser support
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Allowed HTTP Methods
+  credentials: true, // Allow cookies and other credentials
+};
+
 const startServer = async () => {
+  if (typeof Bun !== 'undefined') {
+    axios.defaults.headers.common['Accept-Encoding'] = 'gzip';
+  }
   await connectDb();
   logger.info('Connected to MongoDB');
   await indexSync();
@@ -39,9 +51,10 @@ const startServer = async () => {
   app.use(mongoSanitize());
   app.use(express.urlencoded({ extended: true, limit: '3mb' }));
   app.use(express.static(app.locals.paths.dist));
-  app.use(express.static(app.locals.paths.publicPath));
+  app.use(express.static(app.locals.paths.fonts));
+  app.use(express.static(app.locals.paths.assets));
   app.set('trust proxy', 1); // trust first proxy
-  app.use(cors());
+  app.use(cors(corsOptions));
 
   if (!ALLOW_SOCIAL_LOGIN) {
     console.warn(
@@ -53,6 +66,11 @@ const startServer = async () => {
   app.use(passport.initialize());
   passport.use(await jwtLogin());
   passport.use(passportLogin());
+
+  // LDAP Auth
+  if (process.env.LDAP_URL && process.env.LDAP_USER_SEARCH_BASE) {
+    passport.use(ldapLogin);
+  }
 
   if (isEnabled(ALLOW_SOCIAL_LOGIN)) {
     configureSocialLogins(app);
@@ -70,6 +88,7 @@ const startServer = async () => {
   app.use('/api/convos', routes.convos);
   app.use('/api/presets', routes.presets);
   app.use('/api/prompts', routes.prompts);
+  app.use('/api/categories', routes.categories);
   app.use('/api/tokenizer', routes.tokenizer);
   app.use('/api/endpoints', routes.endpoints);
   app.use('/api/balance', routes.balance);
@@ -78,9 +97,14 @@ const startServer = async () => {
   app.use('/api/config', routes.config);
   app.use('/api/assistants', routes.assistants);
   app.use('/api/files', await routes.files.initialize());
+  app.use('/api/subscription', routes.subscriptions);
+  app.use('/api/payment', routes.payment);
+  app.use('/images/', validateImageRequest, routes.staticRoute);
+  app.use('/api/share', routes.share);
+  app.use('/api/roles', routes.roles);
 
   app.use((req, res) => {
-    res.status(404).sendFile(path.join(app.locals.paths.dist, 'index.html'));
+    res.sendFile(path.join(app.locals.paths.dist, 'index.html'));
   });
 
   app.listen(port, host, () => {

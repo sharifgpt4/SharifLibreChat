@@ -17,6 +17,12 @@ const user = require('./user');
 const config = require('./config');
 const assistants = require('./assistants');
 const files = require('./files');
+const subscriptions = require('./subscriptions');
+const payment = require('./payment');
+const staticRoute = require('./static');
+const share = require('./share');
+const categories = require('./categories');
+const roles = require('./roles');
 
 module.exports = {
   search,
@@ -38,4 +44,10 @@ module.exports = {
   config,
   assistants,
   files,
+  subscriptions,
+  payment,
+  staticRoute,
+  share,
+  categories,
+  roles,
 };

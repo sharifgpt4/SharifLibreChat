@@ -1,0 +1,25 @@
+# Build API, Client and Data Provider
+FROM node:20-alpine AS base
+
+# Build data-provider
+FROM base AS data-provider-build
+WORKDIR /app/packages/data-provider
+COPY ./packages/data-provider ./
+RUN npm install
+RUN touch .env
+RUN npm config set fetch-retry-maxtimeout 300000
+RUN apk add --no-cache g++ make python3 py3-pip
+RUN npm install -g node-gyp
+RUN apk --no-cache add curl && \
+    npm install
+RUN npm run build
+
+# Admin panel build
+FROM data-provider-build AS admin-build
+WORKDIR /app/admin
+COPY ./admin/ ./
+
+RUN npm install
+ENV NODE_OPTIONS="--max-old-space-size=2048"
+RUN npm run build
+CMD ["npm", "run", "start"]

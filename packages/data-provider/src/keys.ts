@@ -1,6 +1,9 @@
 export enum QueryKeys {
   messages = 'messages',
+  sharedMessages = 'sharedMessages',
+  sharedLinks = 'sharedLinks',
   allConversations = 'allConversations',
+  archivedConversations = 'archivedConversations',
   searchConversations = 'searchConversations',
   conversation = 'conversation',
   searchEnabled = 'searchEnabled',
@@ -8,6 +11,8 @@ export enum QueryKeys {
   name = 'name', // user key name
   models = 'models',
   balance = 'balance',
+  subscription = 'subscription',
+  payment = 'payment',
   endpoints = 'endpoints',
   presets = 'presets',
   searchResults = 'searchResults',
@@ -22,6 +27,17 @@ export enum QueryKeys {
   tools = 'tools',
   actions = 'actions',
   assistantDocs = 'assistantDocs',
+  fileDownload = 'fileDownload',
+  voices = 'voices',
+  customConfigSpeech = 'customConfigSpeech',
+  prompts = 'prompts',
+  prompt = 'prompt',
+  promptGroups = 'promptGroups',
+  allPromptGroups = 'allPromptGroups',
+  promptGroup = 'promptGroup',
+  categories = 'categories',
+  randomPrompts = 'randomPrompts',
+  roles = 'roles',
 }
 
 export enum MutationKeys {
@@ -31,7 +47,11 @@ export enum MutationKeys {
   deletePreset = 'deletePreset',
   logoutUser = 'logoutUser',
   avatarUpload = 'avatarUpload',
+  speechToText = 'speechToText',
+  textToSpeech = 'textToSpeech',
   assistantAvatarUpload = 'assistantAvatarUpload',
   updateAction = 'updateAction',
   deleteAction = 'deleteAction',
+  deleteUser = 'deleteUser',
+  updateRole = 'updateRole',
 }

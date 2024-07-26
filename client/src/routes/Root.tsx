@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom'; // Add this line to use search params
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { useGetModelsQuery, useGetSearchEnabledQuery } from 'librechat-data-provider/react-query';
 import type { ContextType } from '~/common';
@@ -14,15 +15,20 @@ import {
 import { AssistantsMapContext, FileMapContext } from '~/Providers';
 import { Nav, MobileNav } from '~/components/Nav';
 import store from '~/store';
+import PaymentStatusModal from '~/components/Nav/PaymentStatus'; // Make sure the path is correct
 
 export default function Root() {
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { newConversation } = useConversation();
   const { isAuthenticated } = useAuthContext();
   const [navVisible, setNavVisible] = useState(() => {
     const savedNavVisible = localStorage.getItem('navVisible');
     return savedNavVisible !== null ? JSON.parse(savedNavVisible) : true;
   });
+  const [isPaymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState('');
+  const [paymentTrackId, setPaymentTrackId] = useState('');
 
   const submission = useRecoilValue(store.submission);
   useServerStream(submission ?? null);
@@ -41,9 +47,19 @@ export default function Root() {
   }, [navVisible]);
 
   useEffect(() => {
+    const paymentSuccessParam = searchParams.get('Payment_success');
+    const paymentTrackIdParam = searchParams.get('Payment_trackId');
+
+    if (paymentSuccessParam !== null && paymentTrackIdParam !== null) {
+      setPaymentModalOpen(true);
+      setPaymentSuccess(paymentSuccessParam);
+      setPaymentTrackId(paymentTrackIdParam);
+    }
+  }, [location.search]); // This will trigger the effect whenever the search part of the URL changes
+
+  useEffect(() => {
     if (modelsQuery.data && location.state?.from?.pathname.includes('/chat')) {
       setModelsConfig(modelsQuery.data);
-      // Note: passing modelsQuery.data prevents navigation
       newConversation({}, undefined, modelsQuery.data);
     } else if (modelsQuery.data) {
       setModelsConfig(modelsQuery.data);
@@ -64,6 +80,11 @@ export default function Root() {
     return null;
   }
 
+  // Function to handle closing the modal
+  const handleCloseModal = () => {
+    setPaymentModalOpen(false);
+  };
+
   return (
     <FileMapContext.Provider value={fileMap}>
       <AssistantsMapContext.Provider value={assistantsMap}>
@@ -73,6 +94,12 @@ export default function Root() {
             <div className="relative flex h-full max-w-full flex-1 flex-col overflow-hidden">
               <MobileNav setNavVisible={setNavVisible} />
               <Outlet context={{ navVisible, setNavVisible } satisfies ContextType} />
+              <PaymentStatusModal
+                isOpen={isPaymentModalOpen}
+                onClose={handleCloseModal}
+                success={paymentSuccess === '1'}
+                trackId={paymentTrackId}
+              />
             </div>
           </div>
         </div>

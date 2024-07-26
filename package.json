@@ -1,6 +1,6 @@
 {
   "name": "LibreChat",
-  "version": "0.6.10",
+  "version": "0.7.4-rc1",
   "description": "",
   "workspaces": [
     "api",
@@ -11,6 +11,7 @@
     "update": "node config/update.js",
     "add-balance": "node config/add-balance.js",
     "list-balances": "node config/list-balances.js",
+    "user-stats": "node config/user-stats.js",
     "rebuild:package-lock": "node config/packages",
     "reinstall": "node config/update.js -l -g",
     "b:reinstall": "bun config/update.js -b -l -g",
@@ -45,10 +46,11 @@
     "e2e:update": "playwright test --config=e2e/playwright.config.js --update-snapshots",
     "e2e:report": "npx playwright show-report e2e/playwright-report",
     "prepare": "node config/prepare.js",
-    "lint:fix": "eslint --fix \"{,!(node_modules)/**/}*.{js,jsx,ts,tsx}\"",
-    "lint": "eslint \"{,!(node_modules)/**/}*.{js,jsx,ts,tsx}\"",
-    "format": "prettier-eslint --write \"{,!(node_modules)/**/}*.{js,jsx,ts,tsx}\"",
+    "lint:fix": "eslint --fix \"{,!(node_modules|venv)/**/}*.{js,jsx,ts,tsx}\"",
+    "lint": "eslint \"{,!(node_modules|venv)/**/}*.{js,jsx,ts,tsx}\"",
+    "format": "prettier-eslint --write \"{,!(node_modules|venv)/**/}*.{js,jsx,ts,tsx}\"",
     "b:api": "NODE_ENV=production bun run api/server/index.js",
+    "b:api-inspect": "NODE_ENV=production bun --inspect run api/server/index.js",
     "b:api:dev": "NODE_ENV=production bun run --watch api/server/index.js",
     "b:data": "cd packages/data-provider && bun run b:build",
     "b:client": "bun --bun run b:data && cd client && bun --bun run b:build",
@@ -98,5 +100,8 @@
       "admin/",
       "packages/"
     ]
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
   }
 }

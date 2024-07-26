@@ -6,9 +6,18 @@ const {
   deleteMessagesSince,
   deleteMessages,
 } = require('./Message');
+const {
+  comparePassword,
+  deleteUserById,
+  generateToken,
+  getUserById,
+  updateUser,
+  createUser,
+  countUsers,
+  findUser,
+} = require('./userMethods');
 const { getConvoTitle, getConvo, saveConvo, deleteConvos } = require('./Conversation');
 const { getPreset, getPresets, savePreset, deletePresets } = require('./Preset');
-const { hashPassword, getUser, updateUser } = require('./userMethods');
 const {
   findFileById,
   createFile,
@@ -22,18 +31,23 @@ const Key = require('./Key');
 const User = require('./User');
 const Session = require('./Session');
 const Balance = require('./Balance');
-const Transaction = require('./Transaction');
+
+const Subscription = require('./Subscription');
 
 module.exports = {
   User,
   Key,
   Session,
   Balance,
-  Transaction,
 
-  hashPassword,
+  comparePassword,
+  deleteUserById,
+  generateToken,
+  getUserById,
+  countUsers,
+  createUser,
   updateUser,
-  getUser,
+  findUser,
 
   getMessages,
   saveMessage,
@@ -59,4 +73,6 @@ module.exports = {
   deleteFiles,
   getFiles,
   updateFileUsage,
+
+  Subscription,
 };

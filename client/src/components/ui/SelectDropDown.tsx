@@ -1,17 +1,26 @@
 import React from 'react';
-import { Listbox, Transition } from '@headlessui/react';
-import type { Option } from '~/common';
+import {
+  Listbox,
+  ListboxButton,
+  Label,
+  ListboxOptions,
+  ListboxOption,
+  Transition,
+} from '@headlessui/react';
+import type { Option, OptionWithIcon } from '~/common';
 import CheckMark from '../svg/CheckMark';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils/';
+import { useMultiSearch } from './MultiSearch';
 
 type SelectDropDownProps = {
   id?: string;
   title?: string;
-  value: string | null | Option;
+  value: string | null | Option | OptionWithIcon;
   disabled?: boolean;
   setValue: (value: string) => void;
-  availableValues: string[] | Option[];
+  tabIndex?: number;
+  availableValues: string[] | Option[] | OptionWithIcon[];
   emptyTitle?: boolean;
   showAbove?: boolean;
   showLabel?: boolean;
@@ -23,6 +32,9 @@ type SelectDropDownProps = {
   optionsClass?: string;
   subContainerClassName?: string;
   className?: string;
+  searchClassName?: string;
+  searchPlaceholder?: string;
+  showOptionIcon?: boolean;
 };
 
 function SelectDropDown({
@@ -30,6 +42,7 @@ function SelectDropDown({
   value,
   disabled,
   setValue,
+  tabIndex,
   availableValues,
   showAbove = false,
   showLabel = true,
@@ -42,6 +55,9 @@ function SelectDropDown({
   subContainerClassName,
   className,
   renderOption,
+  searchClassName,
+  searchPlaceholder,
+  showOptionIcon,
 }: SelectDropDownProps) {
   const localize = useLocalize();
   const transitionProps = { className: 'top-full mt-3' };
@@ -57,41 +73,71 @@ function SelectDropDown({
     title = localize('com_ui_model');
   }
 
+  // Detemine if we should to convert this component into a searchable select.  If we have enough elements, a search
+  // input will appear near the top of the menu, allowing correct filtering of different model menu items. This will
+  // reset once the component is unmounted (as per a normal search)
+  const [filteredValues, searchRender] = useMultiSearch<string[] | Option[]>({
+    availableOptions: availableValues,
+    placeholder: searchPlaceholder,
+    getTextKeyOverride: (option) => ((option as Option)?.label || '').toUpperCase(),
+    className: searchClassName,
+  });
+  const hasSearchRender = Boolean(searchRender);
+  const options = hasSearchRender ? filteredValues : availableValues;
+
   return (
     <div className={cn('flex items-center justify-center gap-2 ', containerClassName ?? '')}>
       <div className={cn('relative w-full', subContainerClassName ?? '')}>
         <Listbox value={value} onChange={setValue} disabled={disabled}>
           {({ open }) => (
             <>
-              <Listbox.Button
+              <ListboxButton
                 data-testid="select-dropdown-button"
                 className={cn(
-                  'relative flex w-full cursor-default flex-col rounded-md border border-black/10 bg-white py-2 pl-3 pr-10 text-left focus:outline-none focus:ring-0 focus:ring-offset-0 dark:border-white/20 dark:bg-gray-800 sm:text-sm',
+                  'relative flex w-full cursor-default flex-col rounded-md border border-black/10 bg-white py-2 pl-3 pr-10 text-left dark:border-gray-600 dark:bg-gray-700 sm:text-sm',
                   className ?? '',
                 )}
               >
                 {' '}
                 {showLabel && (
-                  <Listbox.Label
+                  <Label
                     className="block text-xs text-gray-700 dark:text-gray-500 "
                     id="headlessui-listbox-label-:r1:"
                     data-headlessui-state=""
                   >
-                    {title}
+<<<<<<< HEAD
+                    {title === 'gpt-4-turbo-preview'? (
+                      'gpt-4.5-turbo'
+                    ):  title  }
                   </Listbox.Label>
+=======
+                    {title}
+                  </Label>
+>>>>>>> e5dfa06e6ce11e7cf4e11c400ec028dc8ee3600d
                 )}
                 <span className="inline-flex w-full truncate">
                   <span
                     className={cn(
-                      'flex h-6 items-center gap-1 truncate text-sm text-gray-900 dark:text-white',
+                      'flex h-6 items-center gap-1 truncate text-sm text-gray-800 dark:text-white',
                       !showLabel ? 'text-xs' : '',
                       currentValueClass ?? '',
                     )}
                   >
                     {!showLabel && !emptyTitle && (
-                      <span className="text-xs text-gray-700 dark:text-gray-500">{title}:</span>
+                      <span className="text-xs text-gray-700 dark:text-gray-500">{title === 'gpt-4-turbo-preview'? (
+                        'gpt-4.5-turbo'
+                      ):  title  }:</span>
+                    )}
+<<<<<<< HEAD
+                    {typeof value !== 'string' && value ? value?.label ?? '' : value === 'gpt-4-turbo-preview'? 'gpt-4.5-turbo':  value}
+=======
+                    {showOptionIcon && value && (value as OptionWithIcon)?.icon && (
+                      <span className="icon-md flex items-center">
+                        {(value as OptionWithIcon).icon}
+                      </span>
                     )}
                     {typeof value !== 'string' && value ? value?.label ?? '' : value ?? ''}
+>>>>>>> e5dfa06e6ce11e7cf4e11c400ec028dc8ee3600d
                   </span>
                 </span>
                 <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
@@ -111,7 +157,7 @@ function SelectDropDown({
                     <polyline points="6 9 12 15 18 9"></polyline>
                   </svg>
                 </span>
-              </Listbox.Button>
+              </ListboxButton>
               <Transition
                 show={open}
                 as={React.Fragment}
@@ -120,59 +166,72 @@ function SelectDropDown({
                 leaveTo="opacity-0"
                 {...transitionProps}
               >
-                <Listbox.Options
+                <ListboxOptions
                   className={cn(
-                    'absolute z-10 mt-2 max-h-60 w-full overflow-auto rounded bg-white text-base text-xs border ring-black/10 focus:outline-none dark:bg-gray-800 dark:ring-white/20 dark:last:border-0 md:w-[100%]',
+                    'absolute z-10 mt-2 max-h-60 w-full overflow-auto rounded border bg-white text-xs ring-black/10 dark:border-gray-600 dark:bg-gray-700 dark:ring-white/20 md:w-[100%]',
                     optionsListClass ?? '',
                   )}
                 >
                   {renderOption && (
-                    <Listbox.Option
+                    <ListboxOption
                       key={'listbox-render-option'}
                       value={null}
                       className={cn(
-                        'group relative flex h-[42px] cursor-pointer select-none items-center overflow-hidden border-b border-black/10 pl-3 pr-9 text-gray-900 last:border-0 hover:bg-gray-20 dark:border-white/20 dark:text-white dark:hover:bg-gray-700',
+                        'group relative flex h-[42px] cursor-pointer select-none items-center overflow-hidden border-b border-black/10 pl-3 pr-9 text-gray-800 last:border-0 hover:bg-gray-20 dark:border-white/20 dark:text-white dark:hover:bg-gray-700',
                         optionsClass ?? '',
                       )}
                     >
                       {renderOption()}
-                    </Listbox.Option>
+                    </ListboxOption>
                   )}
-                  {availableValues.map((option: string | Option, i: number) => {
+                  {searchRender}
+                  {options.map((option: string | Option, i: number) => {
                     if (!option) {
                       return null;
                     }
 
                     const currentLabel = typeof option === 'string' ? option : option?.label ?? '';
                     const currentValue = typeof option === 'string' ? option : option?.value ?? '';
+                    const currentIcon =
+                      typeof option === 'string' ? null : (option?.icon as React.ReactNode) ?? null;
                     let activeValue: string | number | null | Option = value;
                     if (typeof activeValue !== 'string') {
                       activeValue = activeValue?.value ?? '';
                     }
 
                     return (
-                      <Listbox.Option
+                      <ListboxOption
                         key={i}
                         value={currentValue}
-                        className={cn(
-                          'group relative flex h-[42px] cursor-pointer select-none items-center overflow-hidden border-b border-black/10 pl-3 pr-9 text-gray-900 last:border-0 hover:bg-gray-20 dark:border-white/20 dark:text-white dark:hover:bg-gray-700',
-                          optionsClass ?? '',
-                        )}
+                        className={({ active }) =>
+                          cn(
+                            'group relative flex h-[42px] cursor-pointer select-none items-center overflow-hidden border-b border-black/10 pl-3 pr-9 text-gray-800 last:border-0 hover:bg-gray-20 dark:border-white/20 dark:text-white dark:hover:bg-gray-700',
+                            active ? 'bg-surface-tertiary' : '',
+                            optionsClass ?? '',
+                          )
+                        }
                       >
                         <span className="flex items-center gap-1.5 truncate">
                           <span
                             className={cn(
-                              'flex h-6 items-center gap-1 text-gray-800 dark:text-gray-100',
+                              'flex h-6 items-center gap-1 text-gray-800 dark:text-gray-200',
                               option === value ? 'font-semibold' : '',
                               iconSide === 'left' ? 'ml-4' : '',
                             )}
                           >
+<<<<<<< HEAD
+                            {currentLabel === 'gpt-4-turbo-preview'? (
+                              'gpt-4.5-turbo'
+                          ):  currentLabel  }
+=======
+                            {currentIcon && <span className="mr-1">{currentIcon}</span>}
                             {currentLabel}
+>>>>>>> e5dfa06e6ce11e7cf4e11c400ec028dc8ee3600d
                           </span>
                           {currentValue === activeValue && (
                             <span
                               className={cn(
-                                'absolute inset-y-0 flex items-center text-gray-800 dark:text-gray-100',
+                                'absolute inset-y-0 flex items-center text-gray-800 dark:text-gray-200',
                                 iconSide === 'left' ? 'left-0 pl-2' : 'right-0 pr-3',
                               )}
                             >
@@ -180,10 +239,10 @@ function SelectDropDown({
                             </span>
                           )}
                         </span>
-                      </Listbox.Option>
+                      </ListboxOption>
                     );
                   })}
-                </Listbox.Options>
+                </ListboxOptions>
               </Transition>
             </>
           )}

@@ -1,10 +1,13 @@
 const OpenAI = require('openai');
+const { OllamaClient } = require('./OllamaClient');
 const { HttpsProxyAgent } = require('https-proxy-agent');
 const {
+  Constants,
   ImageDetail,
   EModelEndpoint,
   resolveHeaders,
   ImageDetailCost,
+  CohereConstants,
   getResponseSender,
   validateVisionModel,
   mapModelToAzureConfig,
@@ -16,14 +19,19 @@ const {
   getModelMaxTokens,
   genAzureChatCompletion,
 } = require('~/utils');
+const {
+  truncateText,
+  formatMessage,
+  CUT_OFF_PROMPT,
+  titleInstruction,
+  createContextHandlers,
+} = require('./prompts');
 const { encodeAndFormat } = require('~/server/services/Files/images/encode');
-const { truncateText, formatMessage, CUT_OFF_PROMPT } = require('./prompts');
+const { isEnabled, sleep } = require('~/server/utils');
 const { handleOpenAIErrors } = require('./tools/util');
 const spendTokens = require('~/models/spendTokens');
 const { createLLM, RunManager } = require('./llm');
 const ChatGPTClient = require('./ChatGPTClient');
-const { isEnabled } = require('~/server/utils');
-const { getFiles } = require('~/models/File');
 const { summaryBuffer } = require('./memory');
 const { runTitleChain } = require('./chains');
 const { tokenSplit } = require('./document');
@@ -40,7 +48,10 @@ class OpenAIClient extends BaseClient {
     super(apiKey, options);
     this.ChatGPTClient = new ChatGPTClient();
     this.buildPrompt = this.ChatGPTClient.buildPrompt.bind(this);
+    /** @type {getCompletion} */
     this.getCompletion = this.ChatGPTClient.getCompletion.bind(this);
+    /** @type {cohereChatCompletion} */
+    this.cohereChatCompletion = this.ChatGPTClient.cohereChatCompletion.bind(this);
     this.contextStrategy = options.contextStrategy
       ? options.contextStrategy.toLowerCase()
       : 'discard';
@@ -48,6 +59,10 @@ class OpenAIClient extends BaseClient {
     /** @type {AzureOptions} */
     this.azure = options.azure || false;
     this.setOptions(options);
+    this.metadata = {};
+
+    /** @type {string | undefined} - The API Completions URL */
+    this.completionsUrl;
   }
 
   // TODO: PluginsClient calls this 3x, unneeded
@@ -91,7 +106,12 @@ class OpenAIClient extends BaseClient {
       };
     }
 
-    this.checkVisionRequest(this.options.attachments);
+    this.defaultVisionModel = this.options.visionModel ?? 'gpt-4-vision-preview';
+    if (typeof this.options.attachments?.then === 'function') {
+      this.options.attachments.then((attachments) => this.checkVisionRequest(attachments));
+    } else {
+      this.checkVisionRequest(this.options.attachments);
+    }
 
     const { OPENROUTER_API_KEY, OPENAI_FORCE_PROMPT } = process.env ?? {};
     if (OPENROUTER_API_KEY && !this.azure) {
@@ -107,6 +127,10 @@ class OpenAIClient extends BaseClient {
       reverseProxy.includes('https://openrouter.ai/api/v1')
     ) {
       this.useOpenRouter = true;
+    }
+
+    if (this.options.endpoint?.toLowerCase() === 'ollama') {
+      this.isOllama = true;
     }
 
     this.FORCE_PROMPT =
@@ -141,11 +165,13 @@ class OpenAIClient extends BaseClient {
       model.startsWith('text-chat') || model.startsWith('text-davinci-002-render');
 
     this.maxContextTokens =
+      this.options.maxContextTokens ??
       getModelMaxTokens(
         model,
         this.options.endpointType ?? this.options.endpoint,
         this.options.endpointTokenConfig,
-      ) ?? 4095; // 1 less than maximum
+      ) ??
+      4095; // 1 less than maximum
 
     if (this.shouldSummarize) {
       this.maxContextTokens = Math.floor(this.maxContextTokens / 2);
@@ -182,16 +208,6 @@ class OpenAIClient extends BaseClient {
 
     this.setupTokens();
 
-    if (!this.modelOptions.stop && !this.isVisionModel) {
-      const stopTokens = [this.startToken];
-      if (this.endToken && this.endToken !== this.startToken) {
-        stopTokens.push(this.endToken);
-      }
-      stopTokens.push(`\n${this.userLabel}:`);
-      stopTokens.push('<|diff_marker|>');
-      this.modelOptions.stop = stopTokens;
-    }
-
     if (reverseProxy) {
       this.completionsUrl = reverseProxy;
       this.langchainProxy = extractBaseURL(reverseProxy);
@@ -222,19 +238,55 @@ class OpenAIClient extends BaseClient {
    * - Sets `this.modelOptions.model` to `gpt-4-vision-preview` if the request is a vision request.
    * - Sets `this.isVisionModel` to `true` if vision request.
    * - Deletes `this.modelOptions.stop` if vision request.
-   * @param {Array<Promise<MongoFile[]> | MongoFile[]> | Record<string, MongoFile[]>} attachments
+   * @param {MongoFile[]} attachments
    */
   checkVisionRequest(attachments) {
-    this.isVisionModel = validateVisionModel(this.modelOptions.model);
-
-    if (attachments && !this.isVisionModel) {
-      this.modelOptions.model = 'gpt-4-vision-preview';
-      this.isVisionModel = true;
+    if (!attachments) {
+      return;
     }
 
+    const availableModels = this.options.modelsConfig?.[this.options.endpoint];
+    if (!availableModels) {
+      return;
+    }
+
+    let visionRequestDetected = false;
+    for (const file of attachments) {
+      if (file?.type?.includes('image')) {
+        visionRequestDetected = true;
+        break;
+      }
+    }
+    if (!visionRequestDetected) {
+      return;
+    }
+
+    this.isVisionModel = validateVisionModel({ model: this.modelOptions.model, availableModels });
     if (this.isVisionModel) {
       delete this.modelOptions.stop;
+      return;
     }
+
+    for (const model of availableModels) {
+      if (!validateVisionModel({ model, availableModels })) {
+        continue;
+      }
+      this.modelOptions.model = model;
+      this.isVisionModel = true;
+      delete this.modelOptions.stop;
+      return;
+    }
+
+    if (!availableModels.includes(this.defaultVisionModel)) {
+      return;
+    }
+    if (!validateVisionModel({ model: this.defaultVisionModel, availableModels })) {
+      return;
+    }
+
+    this.modelOptions.model = this.defaultVisionModel;
+    this.isVisionModel = true;
+    delete this.modelOptions.stop;
   }
 
   setupTokens() {
@@ -256,7 +308,7 @@ class OpenAIClient extends BaseClient {
     let tokenizer;
     this.encoding = 'text-davinci-003';
     if (this.isChatCompletion) {
-      this.encoding = 'cl100k_base';
+      this.encoding = this.modelOptions.model.includes('gpt-4o') ? 'o200k_base' : 'cl100k_base';
       tokenizer = this.constructor.getTokenizer(this.encoding);
     } else if (this.isUnofficialChatGptModel) {
       const extendSpecialTokens = {
@@ -361,10 +413,14 @@ class OpenAIClient extends BaseClient {
 
   getSaveOptions() {
     return {
+      maxContextTokens: this.options.maxContextTokens,
       chatGptLabel: this.options.chatGptLabel,
       promptPrefix: this.options.promptPrefix,
-      resendImages: this.options.resendImages,
+      resendFiles: this.options.resendFiles,
       imageDetail: this.options.imageDetail,
+      iconURL: this.options.iconURL,
+      greeting: this.options.greeting,
+      spec: this.options.spec,
       ...this.modelOptions,
     };
   }
@@ -379,54 +435,6 @@ class OpenAIClient extends BaseClient {
 
   /**
    *
-   * @param {TMessage[]} _messages
-   * @returns {TMessage[]}
-   */
-  async addPreviousAttachments(_messages) {
-    if (!this.options.resendImages) {
-      return _messages;
-    }
-
-    /**
-     *
-     * @param {TMessage} message
-     */
-    const processMessage = async (message) => {
-      if (!this.message_file_map) {
-        /** @type {Record<string, MongoFile[]> */
-        this.message_file_map = {};
-      }
-
-      const fileIds = message.files.map((file) => file.file_id);
-      const files = await getFiles({
-        file_id: { $in: fileIds },
-      });
-
-      await this.addImageURLs(message, files);
-
-      this.message_file_map[message.messageId] = files;
-      return message;
-    };
-
-    const promises = [];
-
-    for (const message of _messages) {
-      if (!message.files) {
-        promises.push(message);
-        continue;
-      }
-
-      promises.push(processMessage(message));
-    }
-
-    const messages = await Promise.all(promises);
-
-    this.checkVisionRequest(this.message_file_map);
-    return messages;
-  }
-
-  /**
-   *
    * Adds image URLs to the message object and returns the files
    *
    * @param {TMessage[]} messages
@@ -434,9 +442,12 @@ class OpenAIClient extends BaseClient {
    * @returns {Promise<MongoFile[]>}
    */
   async addImageURLs(message, attachments) {
-    const { files, image_urls } = await encodeAndFormat(this.options.req, attachments);
-
-    message.image_urls = image_urls;
+    const { files, image_urls } = await encodeAndFormat(
+      this.options.req,
+      attachments,
+      this.options.endpoint,
+    );
+    message.image_urls = image_urls.length ? image_urls : undefined;
     return files;
   }
 
@@ -464,23 +475,9 @@ class OpenAIClient extends BaseClient {
     let promptTokens;
 
     promptPrefix = (promptPrefix || this.options.promptPrefix || '').trim();
-    if (promptPrefix) {
-      promptPrefix = `Instructions:\n${promptPrefix}`;
-      instructions = {
-        role: 'system',
-        name: 'instructions',
-        content: promptPrefix,
-      };
-
-      if (this.contextStrategy) {
-        instructions.tokenCount = this.getTokenCountForMessage(instructions);
-      }
-    }
 
     if (this.options.attachments) {
-      const attachments = (await this.options.attachments).filter((file) =>
-        file.type.includes('image'),
-      );
+      const attachments = await this.options.attachments;
 
       if (this.message_file_map) {
         this.message_file_map[orderedMessages[orderedMessages.length - 1].messageId] = attachments;
@@ -496,6 +493,13 @@ class OpenAIClient extends BaseClient {
       );
 
       this.options.attachments = files;
+    }
+
+    if (this.message_file_map) {
+      this.contextHandlers = createContextHandlers(
+        this.options.req,
+        orderedMessages[orderedMessages.length - 1].text,
+      );
     }
 
     const formattedMessages = orderedMessages.map((message, i) => {
@@ -516,6 +520,11 @@ class OpenAIClient extends BaseClient {
       if (this.message_file_map && this.message_file_map[message.messageId]) {
         const attachments = this.message_file_map[message.messageId];
         for (const file of attachments) {
+          if (file.embedded) {
+            this.contextHandlers?.processFile(file);
+            continue;
+          }
+
           orderedMessages[i].tokenCount += this.calculateImageTokenCost({
             width: file.width,
             height: file.height,
@@ -526,6 +535,24 @@ class OpenAIClient extends BaseClient {
 
       return formattedMessage;
     });
+
+    if (this.contextHandlers) {
+      this.augmentedPrompt = await this.contextHandlers.createContext();
+      promptPrefix = this.augmentedPrompt + promptPrefix;
+    }
+
+    if (promptPrefix) {
+      promptPrefix = `Instructions:\n${promptPrefix.trim()}`;
+      instructions = {
+        role: 'system',
+        name: 'instructions',
+        content: promptPrefix,
+      };
+
+      if (this.contextStrategy) {
+        instructions.tokenCount = this.getTokenCountForMessage(instructions);
+      }
+    }
 
     // TODO: need to handle interleaving instructions better
     if (this.contextStrategy) {
@@ -554,6 +581,7 @@ class OpenAIClient extends BaseClient {
     return result;
   }
 
+  /** @type {sendCompletion} */
   async sendCompletion(payload, opts = {}) {
     let reply = '';
     let result = null;
@@ -562,7 +590,7 @@ class OpenAIClient extends BaseClient {
     const invalidBaseUrl = this.completionsUrl && extractBaseURL(this.completionsUrl) === null;
     const useOldMethod = !!(invalidBaseUrl || !this.isChatCompletion);
     if (typeof opts.onProgress === 'function' && useOldMethod) {
-      await this.getCompletion(
+      const completionResult = await this.getCompletion(
         payload,
         (progressMessage) => {
           if (progressMessage === '[DONE]') {
@@ -595,12 +623,16 @@ class OpenAIClient extends BaseClient {
           opts.onProgress(token);
           reply += token;
         },
+        opts.onProgress,
         opts.abortController || new AbortController(),
       );
+
+      if (completionResult && typeof completionResult === 'string') {
+        reply = completionResult;
+      }
     } else if (typeof opts.onProgress === 'function' || this.options.useChatCompletion) {
       reply = await this.chatCompletion({
         payload,
-        clientOptions: opts,
         onProgress: opts.onProgress,
         abortController: opts.abortController,
       });
@@ -608,8 +640,13 @@ class OpenAIClient extends BaseClient {
       result = await this.getCompletion(
         payload,
         null,
+        opts.onProgress,
         opts.abortController || new AbortController(),
       );
+
+      if (result && typeof result === 'string') {
+        return result.trim();
+      }
 
       logger.debug('[OpenAIClient] sendCompletion: result', result);
 
@@ -620,11 +657,11 @@ class OpenAIClient extends BaseClient {
       }
     }
 
-    if (streamResult && typeof opts.addMetadata === 'function') {
+    if (streamResult) {
       const { finish_reason } = streamResult.choices[0];
-      opts.addMetadata({ finish_reason });
+      this.metadata = { finish_reason };
     }
-    return reply.trim();
+    return (reply ?? '').trim();
   }
 
   initializeLLM({
@@ -719,6 +756,12 @@ class OpenAIClient extends BaseClient {
    *                            In case of failure, it will return the default title, "New Chat".
    */
   async titleConvo({ text, conversationId, responseText = '' }) {
+    this.conversationId = conversationId;
+
+    if (this.options.attachments) {
+      delete this.options.attachments;
+    }
+
     let title = 'New Chat';
     const convo = `||>User:
 "${truncateText(text)}"
@@ -727,7 +770,10 @@ class OpenAIClient extends BaseClient {
 
     const { OPENAI_TITLE_MODEL } = process.env ?? {};
 
-    const model = this.options.titleModel ?? OPENAI_TITLE_MODEL ?? 'gpt-3.5-turbo';
+    let model = this.options.titleModel ?? OPENAI_TITLE_MODEL ?? 'gpt-3.5-turbo';
+    if (model === Constants.CURRENT_MODEL) {
+      model = this.modelOptions.model;
+    }
 
     const modelOptions = {
       // TODO: remove the gpt fallback and make it specific to endpoint
@@ -741,9 +787,10 @@ class OpenAIClient extends BaseClient {
     /** @type {TAzureConfig | undefined} */
     const azureConfig = this.options?.req?.app?.locals?.[EModelEndpoint.azureOpenAI];
 
-    const resetTitleOptions =
+    const resetTitleOptions = !!(
       (this.azure && azureConfig) ||
-      (azureConfig && this.options.endpoint === EModelEndpoint.azureOpenAI);
+      (azureConfig && this.options.endpoint === EModelEndpoint.azureOpenAI)
+    );
 
     if (resetTitleOptions) {
       const { modelGroupMap, groupMap } = azureConfig;
@@ -780,9 +827,8 @@ class OpenAIClient extends BaseClient {
 
       const instructionsPayload = [
         {
-          role: 'system',
-          content: `Detect user language and write in the same language an extremely concise title for this conversation, which you must accurately detect.
-Write in the detected language. Title in 5 Words or Less. No Punctuation or Quotation. Do not mention the language. All first letters of every word should be capitalized and write the title in User Language only.
+          role: this.options.titleMessageRole ?? 'system',
+          content: `Please generate ${titleInstruction}
 
 ${convo}
 
@@ -790,10 +836,22 @@ ${convo}
         },
       ];
 
+      const promptTokens = this.getTokenCountForMessage(instructionsPayload[0]);
+
       try {
+        let useChatCompletion = true;
+
+        if (this.options.reverseProxyUrl === CohereConstants.API_URL) {
+          useChatCompletion = false;
+        }
+
         title = (
-          await this.sendPayload(instructionsPayload, { modelOptions, useChatCompletion: true })
+          await this.sendPayload(instructionsPayload, { modelOptions, useChatCompletion })
         ).replaceAll('"', '');
+
+        const completionTokens = this.getTokenCount(title);
+
+        this.recordTokenUsage({ promptTokens, completionTokens, context: 'title' });
       } catch (e) {
         logger.error(
           '[OpenAIClient] There was an issue generating the title with the completion method',
@@ -816,6 +874,7 @@ ${convo}
         context: 'title',
         tokenBuffer: 150,
       });
+
       title = await runTitleChain({ llm, text, convo, signal: this.abortController.signal });
     } catch (e) {
       if (e?.message?.toLowerCase()?.includes('abort')) {
@@ -841,7 +900,11 @@ ${convo}
 
     // TODO: remove the gpt fallback and make it specific to endpoint
     const { OPENAI_SUMMARY_MODEL = 'gpt-3.5-turbo' } = process.env ?? {};
-    const model = this.options.summaryModel ?? OPENAI_SUMMARY_MODEL;
+    let model = this.options.summaryModel ?? OPENAI_SUMMARY_MODEL;
+    if (model === Constants.CURRENT_MODEL) {
+      model = this.modelOptions.model;
+    }
+
     const maxContextTokens =
       getModelMaxTokens(
         model,
@@ -945,14 +1008,13 @@ ${convo}
     }
   }
 
-  async recordTokenUsage({ promptTokens, completionTokens }) {
-    logger.debug('[OpenAIClient] recordTokenUsage:', { promptTokens, completionTokens });
+  async recordTokenUsage({ promptTokens, completionTokens, context = 'message' }) {
     await spendTokens(
       {
-        user: this.user,
+        context,
         model: this.modelOptions.model,
-        context: 'message',
         conversationId: this.conversationId,
+        user: this.user ?? this.options.req.user?.id,
         endpointTokenConfig: this.options.endpointTokenConfig,
       },
       { promptTokens, completionTokens },
@@ -966,7 +1028,7 @@ ${convo}
     });
   }
 
-  async chatCompletion({ payload, onProgress, clientOptions, abortController = null }) {
+  async chatCompletion({ payload, onProgress, abortController = null }) {
     let error = null;
     const errorCallback = (err) => (error = err);
     let intermediateReply = '';
@@ -987,15 +1049,6 @@ ${convo}
       }
 
       const baseURL = extractBaseURL(this.completionsUrl);
-      // let { messages: _msgsToLog, ...modelOptionsToLog } = modelOptions;
-      // if (modelOptionsToLog.messages) {
-      //   _msgsToLog = modelOptionsToLog.messages.map((msg) => {
-      //     let { content, ...rest } = msg;
-
-      //     if (content)
-      //     return { ...rest, content: truncateText(content) };
-      //   });
-      // }
       logger.debug('[OpenAIClient] chatCompletion', { baseURL, modelOptions });
       const opts = {
         baseURL,
@@ -1053,15 +1106,21 @@ ${convo}
       }
 
       if (this.azure || this.options.azure) {
-        // Azure does not accept `model` in the body, so we need to remove it.
+        /* Azure Bug, extremely short default `max_tokens` response */
+        if (!modelOptions.max_tokens && modelOptions.model === 'gpt-4-vision-preview') {
+          modelOptions.max_tokens = 4000;
+        }
+
+        /* Azure does not accept `model` in the body, so we need to remove it. */
         delete modelOptions.model;
 
         opts.baseURL = this.langchainProxy
           ? constructAzureURL({
             baseURL: this.langchainProxy,
-            azure: this.azure,
+            azureOptions: this.azure,
           })
-          : this.azureEndpoint.split(/\/(chat|completion)/)[0];
+          : this.azureEndpoint.split(/(?<!\/)\/(chat|completion)\//)[0];
+
         opts.defaultQuery = { 'api-version': this.azure.azureOpenAIApiVersion };
         opts.defaultHeaders = { ...opts.defaultHeaders, 'api-key': this.apiKey };
       }
@@ -1073,15 +1132,13 @@ ${convo}
       let chatCompletion;
       /** @type {OpenAI} */
       const openai = new OpenAI({
+        fetch: this.fetch,
         apiKey: this.apiKey,
         ...opts,
       });
 
-      /* hacky fixes for Mistral AI API:
-      - Re-orders system message to the top of the messages payload, as not allowed anywhere else
-      - If there is only one message and it's a system message, change the role to user
-      */
-      if (opts.baseURL.includes('https://api.mistral.ai/v1') && modelOptions.messages) {
+      /* Re-orders system message to the top of the messages payload, as not allowed anywhere else */
+      if (modelOptions.messages && (opts.baseURL.includes('api.mistral.ai') || this.isOllama)) {
         const { messages } = modelOptions;
 
         const systemMessageIndex = messages.findIndex((msg) => msg.role === 'system');
@@ -1092,10 +1149,16 @@ ${convo}
         }
 
         modelOptions.messages = messages;
+      }
 
-        if (messages.length === 1 && messages[0].role === 'system') {
-          modelOptions.messages[0].role = 'user';
-        }
+      /* If there is only one message and it's a system message, change the role to user */
+      if (
+        (opts.baseURL.includes('api.mistral.ai') || opts.baseURL.includes('api.perplexity.ai')) &&
+        modelOptions.messages &&
+        modelOptions.messages.length === 1 &&
+        modelOptions.messages[0]?.role === 'system'
+      ) {
+        modelOptions.messages[0].role = 'user';
       }
 
       if (this.options.addParams && typeof this.options.addParams === 'object') {
@@ -1116,6 +1179,17 @@ ${convo}
         logger.debug('[OpenAIClient] chatCompletion: dropped params', {
           dropParams: this.options.dropParams,
           modelOptions,
+        });
+      }
+
+      const streamRate = this.options.streamRate ?? Constants.DEFAULT_STREAM_RATE;
+
+      if (this.message_file_map && this.isOllama) {
+        const ollamaClient = new OllamaClient({ baseURL, streamRate });
+        return await ollamaClient.chatCompletion({
+          payload: modelOptions,
+          onProgress,
+          abortController,
         });
       }
 
@@ -1157,6 +1231,8 @@ ${convo}
             stream.controller.abort();
             break;
           }
+
+          await sleep(streamRate);
         }
 
         if (!UnexpectedRoleError) {
@@ -1187,8 +1263,8 @@ ${convo}
       }
 
       const { message, finish_reason } = chatCompletion.choices[0];
-      if (chatCompletion && typeof clientOptions.addMetadata === 'function') {
-        clientOptions.addMetadata({ finish_reason });
+      if (chatCompletion) {
+        this.metadata = { finish_reason };
       }
 
       logger.debug('[OpenAIClient] chatCompletion response', chatCompletion);

@@ -7,7 +7,7 @@ module.exports = {
   darkMode: ['class'],
   theme: {
     // colors: {
-    //   'gpt-dark-gray': '#343541',
+    //   'gpt-dark-gray': '#171717',
     // },
     fontFamily: {
       sans: ['Inter', 'sans-serif'],
@@ -37,19 +37,18 @@ module.exports = {
       },
       colors: {
         gray: {
-          '20': '#ececf1',
-          '50': '#f7f7f8',
-          '70': '#d1d5db',
-          '100': '#d9d9e3',
-          '200': '#d9d9e3', // Replacing .bg-gray-200
-          '300': '#c5c5d2',
-          '400': '#acacb1',
-          '500': '#8e8ea0',
-          '600': '#565869',
-          '700': '#40414f', // Replacing .dark .dark:bg-gray-700 and .dark .dark:hover:bg-gray-700:hover
-          '800': '#343541', // Replacing .dark .dark:bg-gray-800, .bg-gray-800, and .dark .dark:hover:bg-gray-800\/90
-          '900': '#202123', // Replacing .dark .dark:bg-gray-900, .bg-gray-900, and .dark .dark:hover:bg-gray-900:hover
-          '1000': '#444654',
+          20: '#ececf1',
+          50: '#f7f7f8',
+          100: '#ececec',
+          200: '#e3e3e3',
+          300: '#cdcdcd',
+          400: '#999696',
+          500: '#595959',
+          600: '#424242',
+          700: '#2f2f2f',
+          800: '#212121',
+          850: '#171717',
+          900: '#0d0d0d',
         },
         green: {
           50: '#f1f9f7',
@@ -65,14 +64,19 @@ module.exports = {
           900: '#031f29',
         },
         'brand-purple': '#ab68ff',
-        'text-primary': 'var(--gray-800)',
-        'text-secondary': 'var(--gray-600)',
-        'text-tertiary': 'var(--gray-500)',
-        'surface-primary': 'var(--white)',
-        'surface-secondary': 'var(--gray-50)',
-        'surface-tertiary': 'var(--gray-100)',
-        'border-light': 'var(--gray-100)',
-        'border-medium': 'var(--gray-200)',
+        'text-primary': 'var(--text-primary)',
+        'text-secondary': 'var(--text-secondary)',
+        'text-secondary-alt': 'var(--text-secondary-alt)',
+        'text-tertiary': 'var(--text-tertiary)',
+        'surface-primary': 'var(--surface-primary)',
+        'surface-primary-alt': 'var(--surface-primary-alt)',
+        'surface-primary-contrast': 'var(--surface-primary-contrast)',
+        'surface-secondary': 'var(--surface-secondary)',
+        'surface-tertiary': 'var(--surface-tertiary)',
+        'surface-tertiary-alt': 'var(--surface-tertiary-alt)',
+        'border-light': 'var(--border-light)',
+        'border-medium': 'var(--border-medium)',
+        'border-medium-alt': 'var(--border-medium-alt)',
         'border-heavy': 'var(--gray-300)',
         'border-xheavy': 'var(--gray-400',
       },

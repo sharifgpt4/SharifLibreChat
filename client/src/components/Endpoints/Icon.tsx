@@ -1,37 +1,21 @@
-import { EModelEndpoint } from 'librechat-data-provider';
-import UnknownIcon from '~/components/Chat/Menus/Endpoints/UnknownIcon';
-import {
-  Plugin,
-  GPTIcon,
-  PaLMIcon,
-  CodeyIcon,
-  GeminiIcon,
-  AssistantIcon,
-  AnthropicIcon,
-  AzureMinimalIcon,
-  CustomMinimalIcon,
-} from '~/components/svg';
+import { memo } from 'react';
+import type { IconProps } from '~/common';
+import MessageEndpointIcon from './MessageEndpointIcon';
 import { useAuthContext } from '~/hooks/AuthContext';
 import useAvatar from '~/hooks/Messages/useAvatar';
-import { IconProps } from '~/common';
+import useLocalize from '~/hooks/useLocalize';
+import { UserIcon } from '~/components/svg';
 import { cn } from '~/utils';
 
 const Icon: React.FC<IconProps> = (props) => {
   const { user } = useAuthContext();
-  const {
-    size = 30,
-    isCreatedByUser,
-    button,
-    model = '',
-    endpoint,
-    jailbreak,
-    assistantName,
-  } = props;
+  const { size = 30, isCreatedByUser } = props;
 
   const avatarSrc = useAvatar(user);
+  const localize = useLocalize();
 
   if (isCreatedByUser) {
-    const username = user?.name || 'User';
+    const username = user?.name || user?.username || localize('com_nav_user');
 
     return (
       <div
@@ -42,128 +26,25 @@ const Icon: React.FC<IconProps> = (props) => {
         }}
         className={cn('relative flex items-center justify-center', props.className ?? '')}
       >
-        <img className="rounded-sm" src={user?.avatar || avatarSrc} alt="avatar" />
-      </div>
-    );
-  } else {
-    const endpointIcons = {
-      [EModelEndpoint.assistants]: {
-        icon: props.iconURL ? (
+        {!user?.avatar && !user?.username ? (
           <div
-            title={assistantName}
             style={{
-              width: size,
-              height: size,
+              backgroundColor: 'rgb(121, 137, 255)',
+              width: '20px',
+              height: '20px',
+              boxShadow: 'rgba(240, 246, 252, 0.1) 0px 0px 0px 1px',
             }}
-            className={cn('relative flex items-center justify-center', props.className ?? '')}
+            className="relative flex h-9 w-9 items-center justify-center rounded-sm p-1 text-white"
           >
-            <img className="rounded-sm" src={props.iconURL} alt={assistantName} />
+            <UserIcon />
           </div>
         ) : (
-          <div className="h-6 w-6">
-            <div className="relative flex h-full items-center justify-center rounded-full bg-white text-black">
-              <AssistantIcon />
-            </div>
-          </div>
-        ),
-        name: endpoint,
-      },
-      [EModelEndpoint.azureOpenAI]: {
-        icon: <AzureMinimalIcon size={size * 0.5555555555555556} />,
-        bg: 'linear-gradient(0.375turn, #61bde2, #4389d0)',
-        name: 'ChatGPT',
-      },
-      [EModelEndpoint.openAI]: {
-        icon: <GPTIcon size={size * 0.5555555555555556} />,
-        bg:
-          typeof model === 'string' && model.toLowerCase().includes('gpt-4')
-            ? '#AB68FF'
-            : '#19C37D',
-        name: 'ChatGPT',
-      },
-      [EModelEndpoint.gptPlugins]: {
-        icon: <Plugin size={size * 0.7} />,
-        bg: `rgba(69, 89, 164, ${button ? 0.75 : 1})`,
-        name: 'Plugins',
-      },
-      [EModelEndpoint.google]: {
-        icon: model?.toLowerCase()?.includes('code') ? (
-          <CodeyIcon size={size * 0.75} />
-        ) : model?.toLowerCase()?.includes('gemini') ? (
-          <GeminiIcon size={size * 0.7} />
-        ) : (
-          <PaLMIcon size={size * 0.7} />
-        ),
-        name: model?.toLowerCase()?.includes('code')
-          ? 'Codey'
-          : model?.toLowerCase()?.includes('gemini')
-            ? 'Gemini'
-            : 'PaLM2',
-      },
-      [EModelEndpoint.anthropic]: {
-        icon: <AnthropicIcon size={size * 0.5555555555555556} />,
-        bg: '#d09a74',
-        name: 'Claude',
-      },
-      [EModelEndpoint.bingAI]: {
-        icon: jailbreak ? (
-          <img src="/assets/bingai-jb.png" alt="Bing Icon" />
-        ) : (
-          <img src="/assets/bingai.png" alt="Sydney Icon" />
-        ),
-        name: jailbreak ? 'Sydney' : 'BingAI',
-      },
-      [EModelEndpoint.chatGPTBrowser]: {
-        icon: <GPTIcon size={size * 0.5555555555555556} />,
-        bg:
-          typeof model === 'string' && model.toLowerCase().includes('gpt-4')
-            ? '#AB68FF'
-            : `rgba(0, 163, 255, ${button ? 0.75 : 1})`,
-        name: 'ChatGPT',
-      },
-      [EModelEndpoint.custom]: {
-        icon: <CustomMinimalIcon size={size * 0.7} />,
-        name: 'Custom',
-      },
-      null: { icon: <GPTIcon size={size * 0.7} />, bg: 'grey', name: 'N/A' },
-      default: {
-        icon: (
-          <UnknownIcon
-            iconURL={props.iconURL}
-            endpoint={endpoint ?? ''}
-            className="icon-sm"
-            context="message"
-          />
-        ),
-        name: endpoint,
-      },
-    };
-
-    const { icon, bg, name } =
-      endpoint && endpointIcons[endpoint] ? endpointIcons[endpoint] : endpointIcons.default;
-
-    return (
-      <div
-        title={name}
-        style={{
-          background: bg || 'transparent',
-          width: size,
-          height: size,
-        }}
-        className={cn(
-          'relative flex items-center justify-center rounded-sm text-white ',
-          props.className || '',
+          <img className="rounded-full" src={user?.avatar || avatarSrc} alt="avatar" />
         )}
-      >
-        {icon}
-        {/* {error && (
-          <span className="absolute right-0 top-[20px] -mr-2 flex h-4 w-4 items-center justify-center rounded-full border border-white bg-red-500 text-[10px] text-white">
-            !
-          </span>
-        )} */}
       </div>
     );
   }
+  return <MessageEndpointIcon {...props} />;
 };
 
-export default Icon;
+export default memo(Icon);
