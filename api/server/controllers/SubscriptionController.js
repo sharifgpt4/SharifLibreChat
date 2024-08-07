@@ -2,7 +2,6 @@ const { Subscription } = require('~/models');
 
 // Create a new subscription
 exports.createSubscription = async (req, res) => {
-  console.log("HERE S")
   try {
     const subscription = new Subscription(req.body);
     await subscription.save();

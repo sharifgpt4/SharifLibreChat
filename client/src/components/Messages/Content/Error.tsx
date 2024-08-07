@@ -26,6 +26,7 @@ type TTokenBalance = {
   violation_count: number;
   date: Date;
   generations?: TOpenAIMessage[];
+  subscription: boolean;
 };
 
 type TExpiredKey = {
@@ -61,8 +62,11 @@ const errorMessages = {
     }.`;
   },
   token_balance: (json: TTokenBalance) => {
-    const { balance, tokenCost, promptTokens, generations } = json;
-    const message = `Insufficient Funds! Balance: ${balance}. Prompt tokens: ${promptTokens}. Cost: ${tokenCost}.`;
+    const { balance, tokenCost, promptTokens, generations, subscription } = json;
+    let message = `Insufficient Funds! Balance: ${balance}. Prompt tokens: ${promptTokens}. Cost: ${tokenCost}. subs: ${subscription}`;
+    console.log(subscription)
+   
+
     return (
       <>
         {message}

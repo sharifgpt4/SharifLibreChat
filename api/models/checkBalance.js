@@ -20,7 +20,7 @@ const Balance = require('./Balance');
  * @throws {Error} Throws an error if there's an issue with the balance check.
  */
 const checkBalance = async ({ req, res, txData }) => {
-  const { canSpend, balance, tokenCost } = await Balance.check(txData);
+  const { canSpend, balance, tokenCost, hasActiveSubscription } = await Balance.check(txData);
 
   if (canSpend) {
     return true;
@@ -32,7 +32,13 @@ const checkBalance = async ({ req, res, txData }) => {
     balance,
     tokenCost,
     promptTokens: txData.amount,
+    hasActiveSubscription,
   };
+
+  if(!hasActiveSubscription){
+    await logViolation(req, res, type, errorMessage, 0);
+    throw new Error(JSON.stringify(errorMessage));
+  }
 
   if (txData.generations && txData.generations.length > 0) {
     errorMessage.generations = txData.generations;

@@ -1,13 +1,15 @@
 const Zibal = require('../services/Zibal');
 const Payment = require('../../models/Payment'); // Adjust the path as necessary
 const Subscription = require('../../models/Subscription');
+const { Transaction } = require('~/models/Transaction');
 const User = require('~/models/User'); // Adjust the path as necessary
 require('dotenv').config();
 
 // Create a new subscription
 // Create a new payment and initiate a payment request
 exports.createPayment = async (req, res) => {
-  const baseUrl = process.env.BASE_URL || 'https://chat.qstarmachine.com'; // Adjust according to your environment setup
+  //const baseUrl = process.env.BASE_URL || 'https://chat.qstarmachine.com'; // Adjust according to your environment setup
+  const baseUrl = "http://localhost:3090"; // Adjust according to your environment setup
   const callbackUrl = `${baseUrl}/api/payment/callback`;
   const merchant = process.env.ZIBAL_MERCHANT ; // Adjust according to your environment setup
 
@@ -94,7 +96,6 @@ exports.callbackPayment = async (req, res) => {
 
     console.log('Zibal DOne...');
     const User = require('../../models/User'); // Adjust the path as necessary
-    const Transaction = require('../../models/Transaction'); // Ensure you have a Transaction model to create transactions
 
     // Find the user associated with the payment
     const user = await User.findById(updatedPayment.user).populate('activeSubscriptions.subscription');

@@ -124,15 +124,16 @@ const Subscriptions = ({ open, onOpenChange }) => {
       )} style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
         <div className="flex flex-wrap justify-around gap-2 w-full">
           {subscriptions?.map((subscription) => {
-            const isUserCurrentPlan = subscription.id === balanceQuery.data?.subscriptionDetails?.subscription._id;
+            const isUserCurrentPlan = subscription._id === balanceQuery.data?.subscriptionDetails?.subscription._id;
             const balance = balanceQuery.data?.balance?.toString();
+
             const buyButtonValue = isUserCurrentPlan ? `پلن شما | توکن : ${balance}` : `خرید ${subscription.name}`;
-            const isLoading = loadingSubscriptionId === subscription.id; // Determine if this subscription is currently loading
+            const isLoading = loadingSubscriptionId === subscription._id; // Determine if this subscription is currently loading
 
             return (
               <SubscriptionOption
-                key={subscription.id}
-                id={subscription.id}
+                key={subscription._id}
+                id={subscription._id}
                 title={subscription.name}
                 price={subscription.price}
                 duration={subscription.duration}

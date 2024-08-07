@@ -3,7 +3,7 @@ const subscriptionSchema = require('./schema/subscription.js');
 
 subscriptionSchema.methods.toJSON = function () {
   return {
-    id: this._id,
+    _id: this._id,
     name: this.name,
     price: this.price,
     duration: this.duration,

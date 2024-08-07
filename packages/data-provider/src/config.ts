@@ -799,6 +799,11 @@ export enum ViolationTypes {
    * Verify Email Limit Violation.
    */
   VERIFY_EMAIL_LIMIT = 'verify_email_limit',
+  /**
+   * Verify Email Limit Violation.
+   */
+  NO_SUBSCRIPTION = 'no_subscription',
+
 }
 
 /**

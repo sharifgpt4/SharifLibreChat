@@ -32,8 +32,9 @@ const dataProvider = {
     const url = `${apiUrl}/${resource}/get_all_${resource}?${new URLSearchParams(query)}`;
 
     const { data, headers } = await httpClient(url);
+    console.log(data)
     return {
-      data: data, // Assuming the backend response directly contains an array of user objects
+      data: data.map(resource => ({ ...resource, id: resource._id })), // Assuming the backend response directly contains an array of user objects
       total: parseInt(headers.get('x-total-count'), 10),
     };
   },
@@ -44,7 +45,7 @@ const dataProvider = {
   getMany: async (resource, params) => {
     const query = { _filter: JSON.stringify({ ids: params.ids }) };
     const { data } = await httpClient(
-      `${apiUrl}/${resource}/get_many?${new URLSearchParams(query)}`,
+        `${apiUrl}/${resource}/get_many?${new URLSearchParams(query)}`,
     );
     return { data };
   },
@@ -68,7 +69,7 @@ const dataProvider = {
       headers: new Headers({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(params.data),
     });
-    return { data: { ...params.data, id: data.id } };
+    return { data: { ...params.data, _id: data._id } };
   },
   create: async (resource, params) => {
     const { data } = await httpClient(`${apiUrl}/${resource}`, {
@@ -80,7 +81,7 @@ const dataProvider = {
   },
   delete: async (resource, params) => {
     await httpClient(`${apiUrl}/${resource}/${params.id}`, { method: 'DELETE' });
-    return { data: { id: params.id } };
+    return { data: { _id: params.id } };
   },
   // Implement updateMany and deleteMany if needed
 };
