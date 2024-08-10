@@ -8,8 +8,7 @@ require('dotenv').config();
 // Create a new subscription
 // Create a new payment and initiate a payment request
 exports.createPayment = async (req, res) => {
-  //const baseUrl = process.env.BASE_URL || 'https://chat.qstarmachine.com'; // Adjust according to your environment setup
-  const baseUrl = "http://localhost:3090"; // Adjust according to your environment setup
+  const baseUrl = process.env.BASE_URL || 'https://chat.qstarmachine.com'; // Adjust according to your environment setup
   const callbackUrl = `${baseUrl}/api/payment/callback`;
   const merchant = process.env.ZIBAL_MERCHANT ; // Adjust according to your environment setup
 
