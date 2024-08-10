@@ -12,6 +12,7 @@ const httpClient = async (url, options = {}) => {
     options.headers.set('Authorization', `Bearer ${token}`);
   }
   const response = await fetch(url, options);
+
   if (!response.ok) {
     throw new Error(await response.text());
   }
@@ -40,7 +41,7 @@ const dataProvider = {
   },
   getOne: async (resource, params) => {
     const { data } = await httpClient(`${apiUrl}/${resource}/${params.id}`);
-    return { data };
+    return {  data: { ...params.data, id: data._id } };
   },
   getMany: async (resource, params) => {
     const query = { _filter: JSON.stringify({ ids: params.ids }) };
@@ -77,7 +78,7 @@ const dataProvider = {
       headers: new Headers({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(params.data),
     });
-    return { data: data }; // Directly use the user object from the response
+    return {  data: { ...params.data, id: data._id } }; // Directly use the user object from the response
   },
   delete: async (resource, params) => {
     await httpClient(`${apiUrl}/${resource}/${params.id}`, { method: 'DELETE' });

@@ -41,7 +41,7 @@ const StringArrayField = ({ source }) => {
 export const SubscriptionList = props => (
   <List {...props}>
     <Datagrid>
-      <TextField source="id" />
+      <TextField source="_id" />
       <TextField source="name" />
       <NumberField source="price" />
       <NumberField source="duration" />
@@ -57,7 +57,7 @@ export const SubscriptionList = props => (
 export const SubscriptionShow = props => (
   <Show {...props}>
     <SimpleShowLayout>
-      <TextField source="id" />
+      <TextField source="_id" />
       <TextField source="name" />
       <NumberField source="price" />
       <NumberField source="duration" />
@@ -93,7 +93,7 @@ export const SubscriptionCreate = props => (
 export const SubscriptionEdit = props => (
   <Edit {...props}>
     <SimpleForm>
-      <TextInput disabled source="id" />
+      <TextInput disabled source="_id" />
       <TextInput source="name" />
       <NumberInput source="price" />
       <NumberInput source="duration" helpText="Duration in days" />
