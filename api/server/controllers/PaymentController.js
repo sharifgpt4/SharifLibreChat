@@ -9,9 +9,9 @@ require('dotenv').config();
 // Create a new payment and initiate a payment request
 exports.createPayment = async (req, res) => {
   const baseUrl = process.env.BASE_URL || 'https://chat.qstarmachine.com'; // Adjust according to your environment setup
-  const callbackUrl = `${baseUrl}/api/payment/callback`;
+  const callbackUrl = `https://qstar.sharifgpt.com`;
   const merchant = process.env.ZIBAL_MERCHANT ; // Adjust according to your environment setup
-
+  console.log(callbackUrl)
   Zibal.init({
     merchant: merchant,
     //merchant: 'zibal', // TEST
